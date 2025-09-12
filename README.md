@@ -13,10 +13,10 @@
 
 **❗ Important notes for wardens** 
 
-1. While this audit's code is not yet deployed, a variation of the ["live criticals" exception](https://docs.code4rena.com/awarding#the-live-criticals-exception) will apply:**
-  - Sponsor's will have the ability to fix any High/Critical submissions during the submission phase of the audit.  Once the sponsor has identified a fix, C4 will post a note for the wardens in the audit channel to let them know to get any in-progress submissions in within a 24-hour period.
+1. While this audit's code is not yet deployed, a variation of the ["live criticals" exception](https://docs.code4rena.com/awarding#the-live-criticals-exception) will apply:
+   - Sponsor's will have the ability to fix any High/Critical submissions during the submission phase of the audit.  Once the sponsor has identified a fix, C4 staff will notify wardens in the audit channel to submit any in-progress work.
   - Wardens are encouraged to submit High-risk submissions promptly, to ensure timely disclosure of such vulnerabilities to the sponsor and guarantee payout in the case where [a sponsor patches a live critical during the audit](https://docs.code4rena.com/awarding#the-live-criticals-exception).
-  - Once the patch has been applied, it will be added to this audit repo as a known issue.
+  - Once the fix has been applied, it will be added to the `Publicly Known Issues` section.
 2. Prior to receiving payment for this audit, you MUST become a [Certified Contributor](https://docs.code4rena.com/roles/sr-wardens#certified-contributors) (successfully complete KYC).
   - You do not have to be certified prior to submitting bugs.
   - But you must successfully complete the certification process within 30 days of the award announcement in order to receive awards. 
