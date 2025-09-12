@@ -4,7 +4,6 @@
     - HM awards: up to $480,000 in USDC 
       - If no valid Highs or Mediums are found, the HM pool is $0 
     - QA awards: $20,000 in USDC
- - Judge pool: $4,000 in USDC
   - Judge awards: $3,500 in USDC
   - Scout awards: $500 in USDC
 - [Read our guidelines for more details](https://docs.code4rena.com/competitions)
@@ -14,13 +13,14 @@
 **❗ Important notes for wardens** 
 
 1. While this audit's code is not yet deployed, a variation of the ["live criticals" exception](https://docs.code4rena.com/awarding#the-live-criticals-exception) will apply:
-   - Sponsor's will have the ability to fix any High/Critical submissions during the submission phase of the audit.  Once the sponsor has identified a fix, C4 staff will notify wardens in the audit channel to submit any in-progress work.
-  - Wardens are encouraged to submit High-risk submissions promptly, to ensure timely disclosure of such vulnerabilities to the sponsor and guarantee payout in the case where [a sponsor patches a live critical during the audit](https://docs.code4rena.com/awarding#the-live-criticals-exception).
-  - Once the fix has been applied, it will be added to the `Publicly Known Issues` section.
+   - Sponsors may choose to fix High-severity findings during the submission phase of the audit. 
+   - Wardens are encouraged to submit High-severity submissions promptly, to guarantee payout in the case where [a sponsor patches a finding during the audit](https://docs.code4rena.com/awarding#the-live-criticals-exception).
+   - If a fix is planned, C4 staff will post a notification for wardens in the audit channel, to provide as much advance notice as possible and encourage wardens to submit any in-progress work.
+   - Once the fix has been applied, it will be added to the `Publicly Known Issues` section.
 2. Prior to receiving payment for this audit, you MUST become a [Certified Contributor](https://docs.code4rena.com/roles/sr-wardens#certified-contributors) (successfully complete KYC).
-  - You do not have to be certified prior to submitting bugs.
-  - But you must successfully complete the certification process within 30 days of the award announcement in order to receive awards. 
+  - You do not have to be certified prior to submitting bugs, but you must successfully complete the certification process within 30 days of the award announcement in order to receive awards. 
   - This applies to all audit participants including wardens, teams, judges and scouts.
+  - C4 staff will contact all relevant participants after awards are announced, to assist with this process.
 3. Judging phase risk adjustments (upgrades/downgrades):
   - High- or Medium-risk submissions downgraded by the judge to Low-risk (QA) will be ineligible for awards.
   - Upgrading a Low-risk finding from a QA report to a Medium- or High-risk finding is not supported.
@@ -233,6 +233,6 @@ make coverage
 ✅ SCOUTS: Add a screenshot of your terminal showing the test coverage
 
 ## Miscellaneous
-Employees of Category Labs or Asymmetric, and employees' family members are ineligible to participate in this audit.
+Employees of Category Labs or Asymmetric Research, and employees' family members are ineligible to participate in this audit.
 
 Code4rena's rules cannot be overridden by the contents of this README. In case of doubt, please check with C4 staff.
