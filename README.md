@@ -1,7 +1,7 @@
 # Monad audit details
 - Total Prize Pool: $504,000 in USDC
   - Warden pool: $500,000 in USDC
-    - HM awards: up to $480,000 in USDC 
+    - HM awards: $480,000 in USDC 
     - QA awards: $20,000 in USDC
   - Judge awards: $3,500 in USDC
   - Scout awards: $500 in USDC
