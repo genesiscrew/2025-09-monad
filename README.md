@@ -1,8 +1,10 @@
 # Monad audit details
 - Total Prize Pool: $504,000 in USDC
-  - HM awards: up to $480,000 in USDC 
-    - If no valid Highs or Mediums are found, the HM pool is $0 
-  - QA awards: $20,000 in USDC
+  - Warden pool: $500,000 in USDC
+    - HM awards: up to $480,000 in USDC 
+      - If no valid Highs or Mediums are found, the HM pool is $0 
+    - QA awards: $20,000 in USDC
+ - Judge pool: $4,000 in USDC
   - Judge awards: $3,500 in USDC
   - Scout awards: $500 in USDC
 - [Read our guidelines for more details](https://docs.code4rena.com/competitions)
@@ -12,11 +14,13 @@
 **❗ Important notes for wardens** 
 
 1. While this audit's code is not yet deployed, a variation of the ["live criticals" exception](https://docs.code4rena.com/awarding#the-live-criticals-exception) will apply:**
+  - Sponsor's will have the ability to fix any High/Critical submissions during the submission phase of the audit.  Once the sponsor has identified a fix, C4 will post a note for the wardens in the audit channel to let them know to get any in-progress submissions in within a 24-hour period.
   - Wardens are encouraged to submit High-risk submissions promptly, to ensure timely disclosure of such vulnerabilities to the sponsor and guarantee payout in the case where [a sponsor patches a live critical during the audit](https://docs.code4rena.com/awarding#the-live-criticals-exception).
-  - [include more details]
+  - Once the patch has been applied, it will be added to this audit repo as a known issue.
 2. Prior to receiving payment for this audit, you MUST become a [Certified Contributor](https://docs.code4rena.com/roles/sr-wardens#certified-contributors) (successfully complete KYC).
   - You do not have to be certified prior to submitting bugs.
-  - [include more details]
+  - But you must successfully complete the certification process within 30 days of the award announcement in order to receive awards. 
+  - This applies to all audit participants including wardens, teams, judges and scouts.
 3. Judging phase risk adjustments (upgrades/downgrades):
   - High- or Medium-risk submissions downgraded by the judge to Low-risk (QA) will be ineligible for awards.
   - Upgrading a Low-risk finding from a QA report to a Medium- or High-risk finding is not supported.
@@ -108,38 +112,44 @@ Any GitHub issues raised prior to the start of the audit contest found in the fo
 ### Files out of scope
 ✅ SCOUTS: List files/directories out of scope
 
+Any code not reachable via a running node under default configuration (e.g., test, mock or fuzzing code) is out of scope. Any project, development, build configuration or build, scripting or other miscellaneous development or testing files are out of scope. 
+
+Findings concerning known vulnerabilities within third-party dependencies (‘**/third_party/*’) themselves are out of scope. However, a bug is considered a valid finding if it leads to a protocol-level vulnerability.
+
+Any proof of concepts must demonstrate how the report is triggerable by an attacker, outlining the full attack path on a default node configuration, which exploits in-scope code.
+
 # Additional context
 
 ## Areas of concern (where to focus for bugs)
 
 The team's primary concerns for the Monad protocol are focused on the following components:
 
--	**Consensus Safety:** The stability of the MonadBFT consensus mechanism is paramount.
-  -	Malicious validator activity and its potential to disrupt the consensus process.
-  -	General safety or liveness issues and disruption of the consensus process that can arise from a byzantine validator activity (within protocol assumptions of < 1/3 stake)
-  -	The possibility of a faulty node causing a chain split or incorrect finality.
-  -	Exploitation of the leader election process for unfair advantage.
+- **Consensus Safety:** The stability of the MonadBFT consensus mechanism is paramount.
+    -	Malicious validator activity and its potential to disrupt the consensus process.
+    -	General safety or liveness issues and disruption of the consensus process that can arise from a byzantine validator activity (within protocol assumptions of < 1/3 stake)
+    -	The possibility of a faulty node causing a chain split or incorrect finality.
+    -	Exploitation of the leader election process for unfair advantage.
 -	**Networking Layer (RaptorCast):** The custom message delivery protocol is a potential attack surface.
-  -	Abuse of the broadcast tree by a malicious node to delay block propagation.
-  -	Denial-of-Service (DoS) attacks via spamming with invalid or malformed RaptorCast chunks.
-  -	Vulnerabilities in the signature and Merkle tree verification logic.
-  -	Incorrect encoding or decoding of messages, or tampering of messages
-  -	Exploitation of the local mempool and transaction forwarding to create race conditions.
+    -	Abuse of the broadcast tree by a malicious node to delay block propagation.
+    -	Denial-of-Service (DoS) attacks via spamming with invalid or malformed RaptorCast chunks.
+    -	Vulnerabilities in the signature and Merkle tree verification logic.
+    -	Incorrect encoding or decoding of messages, or tampering of messages
+    -	Exploitation of the local mempool and transaction forwarding to create race conditions.
 -	**Parallel Execution and State Integrity:** Parallel execution is a core innovation and a critical area of concern.
-  -	Potential for non-deterministic outcomes or state mismatches between nodes.
-  -	Accurate and robust read/write set analysis.
-  -	Risk of non-deterministic outcomes from asynchronous execution.
+    -	Potential for non-deterministic outcomes or state mismatches between nodes.
+    -	Accurate and robust read/write set analysis.
+    -	Risk of non-deterministic outcomes from asynchronous execution.
 -	**Transaction and Fee Model:** The custom gas model requires scrutiny.
-  -	Manipulation of the gas limit for DoS attacks.
-  -	Correctness and resistance to overflow/underflow in fee calculations.
-  -	Correct handling of unexpected state reversions.
+    -	Manipulation of the gas limit for DoS attacks.
+    -	Correctness and resistance to overflow/underflow in fee calculations.
+    -	Correct handling of unexpected state reversions.
 -	**MonadDB Integrity:** The custom database (`MonadDB`) is essential for state management.
-  -	Corruption or bypassing of database integrity checks.
-  -	Race conditions in parallel state access.
+    -	Corruption or bypassing of database integrity checks.
+    -	Race conditions in parallel state access.
 -	**JIT VM and Interpreter:** The Just-In-Time (JIT) compiler is a highly sensitive component.
-  -	Differences in execution output between interpreted and JIT-compiled EVM bytecode.
-  -	Potential for a malicious contract to achieve **remote code execution (RCE)**.
-  -	Data persistence or corruption in the cache after a transaction rollback.
+    -	Differences in execution output between interpreted and JIT-compiled EVM bytecode.
+    -	Potential for a malicious contract to achieve **remote code execution (RCE)**.
+    -	Data persistence or corruption in the cache after a transaction rollback.
 
 ## Main invariants
 
@@ -198,7 +208,7 @@ git submodule update --init --recursive
 ./build/test/vm/unit/vm-unit-tests
 ```
 
-Additional Comments
+**Additional Comments**
 
 The codebase uses features of the Linux kernel and makes use of instructions specific to x86 such as AVX. It further requires Rust 1.87 and Clang 19 or newer.
 
