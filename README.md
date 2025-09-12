@@ -2,7 +2,6 @@
 - Total Prize Pool: $504,000 in USDC
   - Warden pool: $500,000 in USDC
     - HM awards: up to $480,000 in USDC 
-      - If no valid Highs or Mediums are found, the HM pool is $0 
     - QA awards: $20,000 in USDC
   - Judge awards: $3,500 in USDC
   - Scout awards: $500 in USDC
@@ -12,16 +11,17 @@
 
 **❗ Important notes for wardens** 
 
-1. While this audit's code is not yet deployed, a variation of the ["live criticals" exception](https://docs.code4rena.com/awarding#the-live-criticals-exception) will apply:
-   - Sponsors may choose to fix High-severity findings during the submission phase of the audit. 
-   - Wardens are encouraged to submit High-severity submissions promptly, to guarantee payout in the case where [a sponsor patches a finding during the audit](https://docs.code4rena.com/awarding#the-live-criticals-exception).
-   - If a fix is planned, C4 staff will post a notification for wardens in the audit channel, to provide as much advance notice as possible and encourage wardens to submit any in-progress work.
-   - Once the fix has been applied, it will be added to the `Publicly Known Issues` section.
-2. Prior to receiving payment for this audit, you MUST become a [Certified Contributor](https://docs.code4rena.com/roles/sr-wardens#certified-contributors) (successfully complete KYC).
+1. If no valid Highs or Mediums are found, the full award pool will be distributed among A- and B-grade QA reports, The submission criteria for QA reports can be viewed [here](https://docs.code4rena.com/competitions/submission-guidelines#qa-reports-low-governance).
+2. While this audit's code is not yet deployed, a variation of the ["live criticals" exception](https://docs.code4rena.com/awarding#the-live-criticals-exception) will apply:
+  - Sponsors may choose to fix High-severity findings during the submission phase of the audit. 
+  - Wardens are encouraged to submit High-severity submissions promptly, to guarantee payout in the case where [a sponsor patches a finding during the audit](https://docs.code4rena.com/awarding#the-live-criticals-exception).
+  - If a fix is planned, C4 staff will post a notification for wardens in the audit channel, to provide as much advance notice as possible and encourage wardens to submit any in-progress work.
+  - Once the fix has been applied, it will be added to the `Publicly Known Issues` section.
+3. Prior to receiving payment for this audit, you MUST become a [Certified Contributor](https://docs.code4rena.com/roles/sr-wardens#certified-contributors) (successfully complete KYC).
   - You do not have to be certified prior to submitting bugs, but you must successfully complete the certification process within 30 days of the award announcement in order to receive awards. 
   - This applies to all audit participants including wardens, teams, judges and scouts.
   - C4 staff will contact all relevant participants after awards are announced, to assist with this process.
-3. Judging phase risk adjustments (upgrades/downgrades):
+4. Judging phase risk adjustments (upgrades/downgrades):
   - High- or Medium-risk submissions downgraded by the judge to Low-risk (QA) will be ineligible for awards.
   - Upgrading a Low-risk finding from a QA report to a Medium- or High-risk finding is not supported.
   - As such, wardens are encouraged to select the appropriate risk level carefully during the submission phase.
