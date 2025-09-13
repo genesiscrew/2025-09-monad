@@ -27,9 +27,7 @@
   - As such, wardens are encouraged to select the appropriate risk level carefully during the submission phase.
 
 ## Automated Findings / Publicly Known Issues
-
-The 4naly3er report can be found [here](https://github.com/code-423n4/2025-09-monad/blob/main/4naly3er-report.md).
-
+ 
 _Note for C4 wardens: Anything included in this `Automated Findings / Publicly Known Issues` section is considered a publicly known issue and is ineligible for awards._
 
 The following issues and risks are considered **known** or **by design** and will not be considered valid findings in this contest.
@@ -82,12 +80,22 @@ Any GitHub issues raised prior to the start of the audit contest found in the fo
 
 # Overview
 
-[ ⭐️ SPONSORS: add info here ]
+Monad is a high-performance Ethereum-compatible L1. Monad materially advances the efficient frontier in the balance between decentralization and scalability.
+
+This repo contains 2 main folders:
+
+## Monad
+
+Contains the execution component of a Monad node. It handles the transaction processing for new blocks, and keeps track of
+the state of the blockchain. Consequently, this repository contains the source code for Category Labs' custom [EVM implementation](https://docs.monad.xyz/monad-arch/execution/native-compilation), its [database implementation](https://docs.monad.xyz/monad-arch/execution/monaddb), and the high-level [transaction scheduling](https://docs.monad.xyz/monad-arch/execution/parallel-execution).
+
+
+## BFT
+Contains the Monad consensus client and JsonRpc server. Monad consensus collects transactions and produces blocks which are written to a ledger filestream. These blocks are consumed by Monad execution, which then updates the state of the blockchain. The [triedb](https://github.com/code-423n4/2025-09-monad/blob/main/bft/monad-triedb/README.md) is a database which stores block information and the blockchain state.
 
 ## Links
 
-- **Previous audits:**  
-  - ✅ SCOUTS: If there are multiple report links, please format them in a list.
+- **Previous audits:**  ✅ 
 - **Documentation:** https://docs.monad.xyz
 - **Website:** https://www.monad.xyz
 - **X/Twitter:** https://x.com/monad
@@ -96,27 +104,742 @@ Any GitHub issues raised prior to the start of the audit contest found in the fo
 
 # Scope
 
-[ ✅ SCOUTS: add scoping and technical details here ]
 
 ### Files in scope
-- ✅ This should be completed using the `metrics.md` file
-- ✅ Last row of the table should be Total: SLOC
-- ✅ SCOUTS: Have the sponsor review and and confirm in text the details in the section titled "Scoping Q amp; A"
 
-*For sponsors that don't use the scoping tool: list all files in scope in the table below (along with hyperlinks) -- and feel free to add notes to emphasize areas of focus.*
+| filename                                                                     | code   |
+|------------------------------------------------------------------------------|--------|
+| ./bft/monad-block-persist/src/lib.rs                                         |    201 |
+| ./bft/monad-blocksync/src/blocksync.rs                                       |   1895 |
+| ./bft/monad-blocksync/src/lib.rs                                             |      2 |
+| ./bft/monad-blocksync/src/messages/message.rs                                |    271 |
+| ./bft/monad-blocksync/src/messages/mod.rs                                    |      1 |
+| ./bft/monad-blocktree/src/blocktree.rs                                       |   1499 |
+| ./bft/monad-blocktree/src/lib.rs                                             |      2 |
+| ./bft/monad-blocktree/src/tree.rs                                            |    264 |
+| ./bft/monad-bls/benches/bls.rs                                               |     97 |
+| ./bft/monad-bls/src/aggregation_tree.rs                                      |    800 |
+| ./bft/monad-bls/src/bls.rs                                                   |    923 |
+| ./bft/monad-bls/src/lib.rs                                                   |    129 |
+| ./bft/monad-chain-config/src/execution_revision.rs                           |     52 |
+| ./bft/monad-chain-config/src/lib.rs                                          |    246 |
+| ./bft/monad-chain-config/src/revision.rs                                     |     83 |
+| ./bft/monad-consensus-state/src/command.rs                                   |    154 |
+| ./bft/monad-consensus-state/src/lib.rs                                       |   4423 |
+| ./bft/monad-consensus-state/src/timestamp.rs                                 |    117 |
+| ./bft/monad-consensus-types/src/block_validator.rs                           |     86 |
+| ./bft/monad-consensus-types/src/block.rs                                     |    741 |
+| ./bft/monad-consensus-types/src/bls.rs                                       |      0 |
+| ./bft/monad-consensus-types/src/checkpoint.rs                                |     33 |
+| ./bft/monad-consensus-types/src/lib.rs                                       |     98 |
+| ./bft/monad-consensus-types/src/metrics.rs                                   |    149 |
+| ./bft/monad-consensus-types/src/no_endorsement.rs                            |     58 |
+| ./bft/monad-consensus-types/src/payload.rs                                   |     91 |
+| ./bft/monad-consensus-types/src/quorum_certificate.rs                        |    110 |
+| ./bft/monad-consensus-types/src/timeout.rs                                   |    366 |
+| ./bft/monad-consensus-types/src/tip.rs                                       |     81 |
+| ./bft/monad-consensus-types/src/validation.rs                                |     14 |
+| ./bft/monad-consensus-types/src/validator_data.rs                            |    189 |
+| ./bft/monad-consensus-types/src/voting.rs                                    |     27 |
+| ./bft/monad-consensus/src/lib.rs                                             |      5 |
+| ./bft/monad-consensus/src/messages/consensus_message.rs                      |    161 |
+| ./bft/monad-consensus/src/messages/message.rs                                |    290 |
+| ./bft/monad-consensus/src/messages/mod.rs                                    |      2 |
+| ./bft/monad-consensus/src/no_endorsement_state.rs                            |    161 |
+| ./bft/monad-consensus/src/pacemaker.rs                                       |    740 |
+| ./bft/monad-consensus/src/validation/certificate_cache.rs                    |    186 |
+| ./bft/monad-consensus/src/validation/mod.rs                                  |      3 |
+| ./bft/monad-consensus/src/validation/safety.rs                               |    150 |
+| ./bft/monad-consensus/src/validation/signing.rs                              |   1813 |
+| ./bft/monad-consensus/src/vote_state.rs                                      |    410 |
+| ./bft/monad-crypto/benches/hasher_bench.rs                                   |     46 |
+| ./bft/monad-crypto/src/certificate_signature.rs                              |    211 |
+| ./bft/monad-crypto/src/hasher.rs                                             |    103 |
+| ./bft/monad-crypto/src/lib.rs                                                |     32 |
+| ./bft/monad-crypto/src/signing_domain.rs                                     |     56 |
+| ./bft/monad-dataplane/examples/node.rs                                       |     99 |
+| ./bft/monad-dataplane/src/addrlist.rs                                        |    235 |
+| ./bft/monad-dataplane/src/ban_expiry.rs                                      |    149 |
+| ./bft/monad-dataplane/src/buffer_ext.rs                                      |     36 |
+| ./bft/monad-dataplane/src/lib.rs                                             |    522 |
+| ./bft/monad-dataplane/src/tcp/mod.rs                                         |    287 |
+| ./bft/monad-dataplane/src/tcp/rx.rs                                          |    383 |
+| ./bft/monad-dataplane/src/tcp/tx.rs                                          |    307 |
+| ./bft/monad-dataplane/src/udp.rs                                             |    264 |
+| ./bft/monad-eth-block-policy/src/lib.rs                                      |   3040 |
+| ./bft/monad-eth-block-policy/src/nonce_usage.rs                              |    241 |
+| ./bft/monad-eth-block-policy/src/validation.rs                               |    476 |
+| ./bft/monad-eth-block-validator/src/lib.rs                                   |   1007 |
+| ./bft/monad-eth-txpool-executor/src/forward.rs                               |    405 |
+| ./bft/monad-eth-txpool-executor/src/ipc/config.rs                            |      7 |
+| ./bft/monad-eth-txpool-executor/src/ipc/mod.rs                               |    122 |
+| ./bft/monad-eth-txpool-executor/src/lib.rs                                   |    544 |
+| ./bft/monad-eth-txpool-executor/src/metrics.rs                               |     27 |
+| ./bft/monad-eth-txpool-executor/src/preload.rs                               |    329 |
+| ./bft/monad-eth-txpool-executor/src/reset.rs                                 |     32 |
+| ./bft/monad-eth-txpool-ipc/src/lib.rs                                        |    151 |
+| ./bft/monad-eth-txpool-types/src/lib.rs                                      |     91 |
+| ./bft/monad-eth-txpool/benches/common/controller.rs                          |    184 |
+| ./bft/monad-eth-txpool/benches/common/mod.rs                                 |    104 |
+| ./bft/monad-eth-txpool/benches/create_proposal.rs                            |     58 |
+| ./bft/monad-eth-txpool/benches/insert.rs                                     |     49 |
+| ./bft/monad-eth-txpool/benches/update.rs                                     |     53 |
+| ./bft/monad-eth-txpool/src/event_tracker.rs                                  |    335 |
+| ./bft/monad-eth-txpool/src/lib.rs                                            |      4 |
+| ./bft/monad-eth-txpool/src/metrics.rs                                        |    121 |
+| ./bft/monad-eth-txpool/src/pool/mod.rs                                       |    505 |
+| ./bft/monad-eth-txpool/src/pool/pending/list.rs                              |     90 |
+| ./bft/monad-eth-txpool/src/pool/pending/mod.rs                               |    120 |
+| ./bft/monad-eth-txpool/src/pool/tracked/list.rs                              |    186 |
+| ./bft/monad-eth-txpool/src/pool/tracked/mod.rs                               |    382 |
+| ./bft/monad-eth-txpool/src/pool/tracked/sequencer.rs                         |    267 |
+| ./bft/monad-eth-txpool/src/pool/transaction.rs                               |    213 |
+| ./bft/monad-eth-types/src/lib.rs                                             |    293 |
+| ./bft/monad-eth-types/src/serde/mod.rs                                       |     39 |
+| ./bft/monad-ethcall/build.rs                                                 |     20 |
+| ./bft/monad-ethcall/src/lib.rs                                               |    405 |
+| ./bft/monad-executor-glue/benches/rlp_bench.rs                               |     58 |
+| ./bft/monad-executor-glue/src/lib.rs                                         |   2168 |
+| ./bft/monad-executor/src/lib.rs                                              |     38 |
+| ./bft/monad-executor/src/metrics.rs                                          |     45 |
+| ./bft/monad-executor/src/timed_event.rs                                      |     36 |
+| ./bft/monad-ledger/src/lib.rs                                                |    234 |
+| ./bft/monad-merkle/src/lib.rs                                                |    135 |
+| ./bft/monad-node-config/examples/linter.rs                                   |     84 |
+| ./bft/monad-node-config/src/bootstrap.rs                                     |     28 |
+| ./bft/monad-node-config/src/fullnode_raptorcast.rs                           |     29 |
+| ./bft/monad-node-config/src/fullnode.rs                                      |     17 |
+| ./bft/monad-node-config/src/lib.rs                                           |     56 |
+| ./bft/monad-node-config/src/network.rs                                       |     45 |
+| ./bft/monad-node-config/src/peers.rs                                         |     19 |
+| ./bft/monad-node-config/src/sync_peers.rs                                    |     23 |
+| ./bft/monad-node/examples/ledger-tail.rs                                     |    257 |
+| ./bft/monad-node/src/cli.rs                                                  |     46 |
+| ./bft/monad-node/src/error.rs                                                |     59 |
+| ./bft/monad-node/src/main.rs                                                 |    739 |
+| ./bft/monad-node/src/state.rs                                                |    148 |
+| ./bft/monad-peer-discovery/examples/sign-name-record.rs                      |     53 |
+| ./bft/monad-peer-discovery/src/discovery.rs                                  |   1846 |
+| ./bft/monad-peer-discovery/src/driver.rs                                     |    290 |
+| ./bft/monad-peer-discovery/src/lib.rs                                        |    306 |
+| ./bft/monad-peer-discovery/src/message.rs                                    |    142 |
+| ./bft/monad-peer-discovery/src/mock.rs                                       |    207 |
+| ./bft/monad-raptor/src/binary_search.rs                                      |     43 |
+| ./bft/monad-raptor/src/lib.rs                                                |     12 |
+| ./bft/monad-raptor/src/matrix/dense_matrix.rs                                |     63 |
+| ./bft/monad-raptor/src/matrix/gaussian.rs                                    |    101 |
+| ./bft/monad-raptor/src/matrix/invert.rs                                      |      6 |
+| ./bft/monad-raptor/src/matrix/mod.rs                                         |      9 |
+| ./bft/monad-raptor/src/matrix/rc_permutation.rs                              |     53 |
+| ./bft/monad-raptor/src/matrix/rc_swap_matrix.rs                              |     66 |
+| ./bft/monad-raptor/src/matrix/row_operation.rs                               |      4 |
+| ./bft/monad-raptor/src/ordered_set.rs                                        |    108 |
+| ./bft/monad-raptor/src/r10/a.rs                                              |     27 |
+| ./bft/monad-raptor/src/r10/degree.rs                                         |     14 |
+| ./bft/monad-raptor/src/r10/half.rs                                           |     22 |
+| ./bft/monad-raptor/src/r10/ldpc.rs                                           |     19 |
+| ./bft/monad-raptor/src/r10/lt.rs                                             |     52 |
+| ./bft/monad-raptor/src/r10/matrix.rs                                         |     14 |
+| ./bft/monad-raptor/src/r10/mod.rs                                            |     13 |
+| ./bft/monad-raptor/src/r10/nonsystematic/decoder/buffer_id.rs                |     19 |
+| ./bft/monad-raptor/src/r10/nonsystematic/decoder/buffer_state.rs             |     30 |
+| ./bft/monad-raptor/src/r10/nonsystematic/decoder/buffer_weight_map.rs        |    211 |
+| ./bft/monad-raptor/src/r10/nonsystematic/decoder/buffer.rs                   |     44 |
+| ./bft/monad-raptor/src/r10/nonsystematic/decoder/check.rs                    |    155 |
+| ./bft/monad-raptor/src/r10/nonsystematic/decoder/decode_finished.rs          |     24 |
+| ./bft/monad-raptor/src/r10/nonsystematic/decoder/decode_inactivate.rs        |     24 |
+| ./bft/monad-raptor/src/r10/nonsystematic/decoder/decode_inactive_gaussian.rs |     94 |
+| ./bft/monad-raptor/src/r10/nonsystematic/decoder/decode_peel.rs              |     64 |
+| ./bft/monad-raptor/src/r10/nonsystematic/decoder/decode_reactivate.rs        |     62 |
+| ./bft/monad-raptor/src/r10/nonsystematic/decoder/decode.rs                   |    105 |
+| ./bft/monad-raptor/src/r10/nonsystematic/decoder/init.rs                     |     81 |
+| ./bft/monad-raptor/src/r10/nonsystematic/decoder/intermediate_symbol.rs      |    121 |
+| ./bft/monad-raptor/src/r10/nonsystematic/decoder/managed_decoder.rs          |    123 |
+| ./bft/monad-raptor/src/r10/nonsystematic/decoder/mod.rs                      |     43 |
+| ./bft/monad-raptor/src/r10/nonsystematic/decoder/receive_symbol.rs           |     59 |
+| ./bft/monad-raptor/src/r10/nonsystematic/encoder.rs                          |    157 |
+| ./bft/monad-raptor/src/r10/nonsystematic/mod.rs                              |      2 |
+| ./bft/monad-raptor/src/r10/parameters.rs                                     |    252 |
+| ./bft/monad-raptor/src/r10/rand.rs                                           |     75 |
+| ./bft/monad-raptor/src/r10/systematic_index.rs                               |    436 |
+| ./bft/monad-raptor/src/xor_eq.rs                                             |     63 |
+| ./bft/monad-raptorcast/benches/raptor_bench.rs                               |    141 |
+| ./bft/monad-raptorcast/examples/service.rs                                   |    215 |
+| ./bft/monad-raptorcast/src/config.rs                                         |    136 |
+| ./bft/monad-raptorcast/src/lib.rs                                            |    845 |
+| ./bft/monad-raptorcast/src/message.rs                                        |    422 |
+| ./bft/monad-raptorcast/src/raptorcast_secondary/client.rs                    |    447 |
+| ./bft/monad-raptorcast/src/raptorcast_secondary/group_message.rs             |    177 |
+| ./bft/monad-raptorcast/src/raptorcast_secondary/mod.rs                       |    461 |
+| ./bft/monad-raptorcast/src/raptorcast_secondary/publisher.rs                 |   1503 |
+| ./bft/monad-raptorcast/src/udp.rs                                            |   1330 |
+| ./bft/monad-raptorcast/src/util.rs                                           |    744 |
+| ./bft/monad-rpc/benches/serialize.rs                                         |     92 |
+| ./bft/monad-rpc/bin/docs.rs                                                  |      7 |
+| ./bft/monad-rpc/build.rs                                                     |     10 |
+| ./bft/monad-rpc/examples/benchmark.rs                                        |     45 |
+| ./bft/monad-rpc/monad-rpc-docs/monad-rpc-docs-derive/src/lib.rs              |    238 |
+| ./bft/monad-rpc/monad-rpc-docs/src/lib.rs                                    |    137 |
+| ./bft/monad-rpc/src/chainstate/buffer.rs                                     |    179 |
+| ./bft/monad-rpc/src/chainstate/mod.rs                                        |   1072 |
+| ./bft/monad-rpc/src/cli.rs                                                   |    104 |
+| ./bft/monad-rpc/src/comparator.rs                                            |     72 |
+| ./bft/monad-rpc/src/docs.rs                                                  |     72 |
+| ./bft/monad-rpc/src/eth_json_types.rs                                        |    494 |
+| ./bft/monad-rpc/src/event/client.rs                                          |     28 |
+| ./bft/monad-rpc/src/event/events.rs                                          |     23 |
+| ./bft/monad-rpc/src/event/mod.rs                                             |      9 |
+| ./bft/monad-rpc/src/event/server.rs                                          |    334 |
+| ./bft/monad-rpc/src/handlers/debug.rs                                        |    693 |
+| ./bft/monad-rpc/src/handlers/eth/account.rs                                  |    176 |
+| ./bft/monad-rpc/src/handlers/eth/block.rs                                    |    206 |
+| ./bft/monad-rpc/src/handlers/eth/call.rs                                     |   1014 |
+| ./bft/monad-rpc/src/handlers/eth/gas.rs                                      |    493 |
+| ./bft/monad-rpc/src/handlers/eth/mod.rs                                      |      5 |
+| ./bft/monad-rpc/src/handlers/eth/txn.rs                                      |    370 |
+| ./bft/monad-rpc/src/handlers/meta.rs                                         |     10 |
+| ./bft/monad-rpc/src/handlers/mod.rs                                          |    809 |
+| ./bft/monad-rpc/src/handlers/resources.rs                                    |    109 |
+| ./bft/monad-rpc/src/hex.rs                                                   |    117 |
+| ./bft/monad-rpc/src/jsonrpc.rs                                               |    413 |
+| ./bft/monad-rpc/src/lib.rs                                                   |     15 |
+| ./bft/monad-rpc/src/main.rs                                                  |    584 |
+| ./bft/monad-rpc/src/metrics.rs                                               |    157 |
+| ./bft/monad-rpc/src/serialize.rs                                             |     80 |
+| ./bft/monad-rpc/src/timing.rs                                                |    109 |
+| ./bft/monad-rpc/src/txpool/client.rs                                         |     50 |
+| ./bft/monad-rpc/src/txpool/handle.rs                                         |     24 |
+| ./bft/monad-rpc/src/txpool/mod.rs                                            |    173 |
+| ./bft/monad-rpc/src/txpool/socket.rs                                         |     74 |
+| ./bft/monad-rpc/src/txpool/state.rs                                          |    568 |
+| ./bft/monad-rpc/src/txpool/types.rs                                          |     10 |
+| ./bft/monad-rpc/src/vpool.rs                                                 |     76 |
+| ./bft/monad-rpc/src/websocket/handler.rs                                     |    821 |
+| ./bft/monad-rpc/src/websocket/mod.rs                                         |      1 |
+| ./bft/monad-secp/benches/secp.rs                                             |    116 |
+| ./bft/monad-secp/src/lib.rs                                                  |    164 |
+| ./bft/monad-secp/src/recoverable_address.rs                                  |    188 |
+| ./bft/monad-secp/src/secp.rs                                                 |    332 |
+| ./bft/monad-state-backend/src/in_memory.rs                                   |    301 |
+| ./bft/monad-state-backend/src/lib.rs                                         |    137 |
+| ./bft/monad-state-backend/src/mock.rs                                        |     66 |
+| ./bft/monad-state-backend/src/thread.rs                                      |    281 |
+| ./bft/monad-state/src/blocksync.rs                                           |    215 |
+| ./bft/monad-state/src/consensus.rs                                           |    679 |
+| ./bft/monad-state/src/epoch.rs                                               |    110 |
+| ./bft/monad-state/src/lib.rs                                                 |   1424 |
+| ./bft/monad-state/src/statesync.rs                                           |    178 |
+| ./bft/monad-statesync/benches/ipc_bench.rs                                   |     69 |
+| ./bft/monad-statesync/build.rs                                               |     21 |
+| ./bft/monad-statesync/src/ffi.rs                                             |    452 |
+| ./bft/monad-statesync/src/ipc.rs                                             |    606 |
+| ./bft/monad-statesync/src/lib.rs                                             |    254 |
+| ./bft/monad-statesync/src/outbound_requests.rs                               |    258 |
+| ./bft/monad-system-calls/src/lib.rs                                          |    200 |
+| ./bft/monad-system-calls/src/staking_contract.rs                             |    162 |
+| ./bft/monad-system-calls/src/validator.rs                                    |    331 |
+| ./bft/monad-tfm/src/arithmetic.rs                                            |    134 |
+| ./bft/monad-tfm/src/base_fee.rs                                              |    301 |
+| ./bft/monad-tfm/src/lib.rs                                                   |      2 |
+| ./bft/monad-triedb-cache/src/lib.rs                                          |    167 |
+| ./bft/monad-triedb-utils/examples/async.rs                                   |     28 |
+| ./bft/monad-triedb-utils/examples/triedb-bench.rs                            |    309 |
+| ./bft/monad-triedb-utils/src/decode.rs                                       |     97 |
+| ./bft/monad-triedb-utils/src/key.rs                                          |    160 |
+| ./bft/monad-triedb-utils/src/lib.rs                                          |    264 |
+| ./bft/monad-triedb-utils/src/mock_triedb.rs                                  |    150 |
+| ./bft/monad-triedb-utils/src/triedb_env.rs                                   |   1075 |
+| ./bft/monad-triedb/build.rs                                                  |     29 |
+| ./bft/monad-triedb/src/lib.rs                                                |    416 |
+| ./bft/monad-types/src/lib.rs                                                 |    659 |
+| ./bft/monad-updaters/src/config_file.rs                                      |    186 |
+| ./bft/monad-updaters/src/config_loader.rs                                    |    210 |
+| ./bft/monad-updaters/src/ledger.rs                                           |    225 |
+| ./bft/monad-updaters/src/lib.rs                                              |    139 |
+| ./bft/monad-updaters/src/local_router.rs                                     |    160 |
+| ./bft/monad-updaters/src/loopback.rs                                         |     63 |
+| ./bft/monad-updaters/src/parent.rs                                           |    219 |
+| ./bft/monad-updaters/src/statesync.rs                                        |    220 |
+| ./bft/monad-updaters/src/timer.rs                                            |    397 |
+| ./bft/monad-updaters/src/timestamp.rs                                        |     58 |
+| ./bft/monad-updaters/src/tokio_timestamp.rs                                  |     69 |
+| ./bft/monad-updaters/src/triedb_val_set.rs                                   |    165 |
+| ./bft/monad-updaters/src/txpool.rs                                           |    520 |
+| ./bft/monad-updaters/src/val_set.rs                                          |    295 |
+| ./bft/monad-validator/src/epoch_manager.rs                                   |     53 |
+| ./bft/monad-validator/src/leader_election.rs                                 |     14 |
+| ./bft/monad-validator/src/lib.rs                                             |      8 |
+| ./bft/monad-validator/src/signature_collection.rs                            |     99 |
+| ./bft/monad-validator/src/simple_round_robin.rs                              |     26 |
+| ./bft/monad-validator/src/validator_mapping.rs                               |     20 |
+| ./bft/monad-validator/src/validator_set.rs                                   |    289 |
+| ./bft/monad-validator/src/validators_epoch_mapping.rs                        |     84 |
+| ./bft/monad-validator/src/weighted_round_robin.rs                            |    220 |
+| ./monad/category/async/concepts.hpp                                          |     46 |
+| ./monad/category/async/config.hpp                                            |    177 |
+| ./monad/category/async/connected_operation.hpp                               |    317 |
+| ./monad/category/async/detail/connected_operation_storage.hpp                |    342 |
+| ./monad/category/async/detail/scope_polyfill.hpp                             |    175 |
+| ./monad/category/async/detail/start_lifetime_as_polyfill.hpp                 |     62 |
+| ./monad/category/async/erased_connected_operation.hpp                        |    456 |
+| ./monad/category/async/io_senders.hpp                                        |    304 |
+| ./monad/category/async/io.cpp                                                |    669 |
+| ./monad/category/async/io.hpp                                                |    562 |
+| ./monad/category/async/sender_errc.hpp                                       |    291 |
+| ./monad/category/async/storage_pool.cpp                                      |    805 |
+| ./monad/category/async/storage_pool.hpp                                      |    276 |
+| ./monad/category/async/util.cpp                                              |    111 |
+| ./monad/category/async/util.hpp                                              |     38 |
+| ./monad/category/core/array.hpp                                              |     23 |
+| ./monad/category/core/assert.c                                               |     56 |
+| ./monad/category/core/assert.h                                               |     98 |
+| ./monad/category/core/backtrace.cpp                                          |    165 |
+| ./monad/category/core/backtrace.hpp                                          |     35 |
+| ./monad/category/core/basic_formatter.hpp                                    |     14 |
+| ./monad/category/core/blake3.hpp                                             |     18 |
+| ./monad/category/core/byte_string.hpp                                        |     25 |
+| ./monad/category/core/bytes_hash_compare.hpp                                 |     20 |
+| ./monad/category/core/bytes.hpp                                              |     49 |
+| ./monad/category/core/cleanup.c                                              |     27 |
+| ./monad/category/core/cleanup.h                                              |     12 |
+| ./monad/category/core/cmemory.hpp                                            |     66 |
+| ./monad/category/core/concat.h                                               |      3 |
+| ./monad/category/core/config.hpp                                             |     19 |
+| ./monad/category/core/cpu_relax.h                                            |      6 |
+| ./monad/category/core/cpuset.c                                               |     31 |
+| ./monad/category/core/cpuset.h                                               |     10 |
+| ./monad/category/core/endian.hpp                                             |      3 |
+| ./monad/category/core/event/event_iterator_inline.h                          |     77 |
+| ./monad/category/core/event/event_iterator.h                                 |     34 |
+| ./monad/category/core/event/event_metadata.h                                 |     15 |
+| ./monad/category/core/event/event_recorder_inline.h                          |     78 |
+| ./monad/category/core/event/event_recorder.h                                 |     29 |
+| ./monad/category/core/event/event_ring_util.c                                |    262 |
+| ./monad/category/core/event/event_ring_util.h                                |     31 |
+| ./monad/category/core/event/event_ring.c                                     |    348 |
+| ./monad/category/core/event/event_ring.h                                     |    168 |
+| ./monad/category/core/fiber/config.hpp                                       |      8 |
+| ./monad/category/core/fiber/priority_algorithm.cpp                           |     54 |
+| ./monad/category/core/fiber/priority_algorithm.hpp                           |     34 |
+| ./monad/category/core/fiber/priority_pool.cpp                                |     87 |
+| ./monad/category/core/fiber/priority_pool.hpp                                |     33 |
+| ./monad/category/core/fiber/priority_properties.hpp                          |     27 |
+| ./monad/category/core/fiber/priority_queue.cpp                               |     18 |
+| ./monad/category/core/fiber/priority_queue.hpp                               |     33 |
+| ./monad/category/core/fiber/priority_task.hpp                                |     13 |
+| ./monad/category/core/format_err.c                                           |     40 |
+| ./monad/category/core/format_err.h                                           |     25 |
+| ./monad/category/core/hash.hpp                                               |     30 |
+| ./monad/category/core/hex_literal.hpp                                        |     55 |
+| ./monad/category/core/int.hpp                                                |     24 |
+| ./monad/category/core/io/buffer_pool.cpp                                     |     22 |
+| ./monad/category/core/io/buffer_pool.hpp                                     |     26 |
+| ./monad/category/core/io/buffers.cpp                                         |     86 |
+| ./monad/category/core/io/buffers.hpp                                         |    112 |
+| ./monad/category/core/io/config.hpp                                          |      8 |
+| ./monad/category/core/io/ring.cpp                                            |     37 |
+| ./monad/category/core/io/ring.hpp                                            |     63 |
+| ./monad/category/core/keccak_impl.S                                          |      1 |
+| ./monad/category/core/keccak.c                                               |     25 |
+| ./monad/category/core/keccak.h                                               |     12 |
+| ./monad/category/core/keccak.hpp                                             |     19 |
+| ./monad/category/core/likely.h                                               |      3 |
+| ./monad/category/core/log_ffi.cpp                                            |    211 |
+| ./monad/category/core/log_ffi.h                                              |     28 |
+| ./monad/category/core/lru/lru_cache.hpp                                      |    325 |
+| ./monad/category/core/lru/static_lru_cache.hpp                               |     99 |
+| ./monad/category/core/math_disas.cpp                                         |      9 |
+| ./monad/category/core/math.hpp                                               |     14 |
+| ./monad/category/core/mem/align.h                                            |     23 |
+| ./monad/category/core/mem/allocators.hpp                                     |    273 |
+| ./monad/category/core/mem/batch_mem_pool.hpp                                 |    109 |
+| ./monad/category/core/mem/huge_mem.cpp                                       |     46 |
+| ./monad/category/core/mem/huge_mem.hpp                                       |     43 |
+| ./monad/category/core/mem/hugetlb_path.c                                     |    145 |
+| ./monad/category/core/mem/hugetlb_path.h                                     |     20 |
+| ./monad/category/core/monad_exception.cpp                                    |     53 |
+| ./monad/category/core/monad_exception.hpp                                    |     43 |
+| ./monad/category/core/nibble.h                                               |     27 |
+| ./monad/category/core/procfs/statm.c                                         |     33 |
+| ./monad/category/core/procfs/statm.h                                         |     11 |
+| ./monad/category/core/result.hpp                                             |      9 |
+| ./monad/category/core/rlp/config.hpp                                         |     15 |
+| ./monad/category/core/rlp/encode_disas.cpp                                   |     37 |
+| ./monad/category/core/rlp/encode.hpp                                         |    138 |
+| ./monad/category/core/size_of.hpp                                            |      6 |
+| ./monad/category/core/small_prng.hpp                                         |     65 |
+| ./monad/category/core/spinlock_disas.c                                       |     17 |
+| ./monad/category/core/spinlock.h                                             |     49 |
+| ./monad/category/core/srcloc.h                                               |     11 |
+| ./monad/category/core/synchronization/spin_lock.hpp                          |    123 |
+| ./monad/category/core/third_party/ankerl/robin_hood.h                        |   1854 |
+| ./monad/category/core/third_party/openssl/crypto/sha/asm/keccak1600-avx2.S   |    543 |
+| ./monad/category/core/third_party/openssl/crypto/sha/asm/keccak1600-avx512.S |    405 |
+| ./monad/category/core/third_party/openssl/crypto/sha/keccak1600.c            |    974 |
+| ./monad/category/core/tl_tid.c                                               |      8 |
+| ./monad/category/core/tl_tid.h                                               |     18 |
+| ./monad/category/core/unaligned.hpp                                          |     12 |
+| ./monad/category/core/unordered_map.hpp                                      |    108 |
+| ./monad/category/core/util/stopwatch.hpp                                     |     30 |
+| ./monad/category/event/example/eventwatch.c                                  |    272 |
+| ./monad/category/execution/ethereum/block_hash_buffer.cpp                    |    162 |
+| ./monad/category/execution/ethereum/block_hash_buffer.hpp                    |     66 |
+| ./monad/category/execution/ethereum/block_hash_history.cpp                   |     51 |
+| ./monad/category/execution/ethereum/block_hash_history.hpp                   |     14 |
+| ./monad/category/execution/ethereum/block_reward.cpp                         |     70 |
+| ./monad/category/execution/ethereum/block_reward.hpp                         |     10 |
+| ./monad/category/execution/ethereum/chain/chain_config.h                     |     16 |
+| ./monad/category/execution/ethereum/chain/chain.cpp                          |     12 |
+| ./monad/category/execution/ethereum/chain/chain.hpp                          |     34 |
+| ./monad/category/execution/ethereum/chain/ethereum_mainnet_alloc.hpp         |  26687 |
+| ./monad/category/execution/ethereum/chain/ethereum_mainnet.cpp               |    144 |
+| ./monad/category/execution/ethereum/chain/ethereum_mainnet.hpp               |     35 |
+| ./monad/category/execution/ethereum/chain/genesis_state.cpp                  |     45 |
+| ./monad/category/execution/ethereum/chain/genesis_state.hpp                  |     12 |
+| ./monad/category/execution/ethereum/core/account.hpp                         |     30 |
+| ./monad/category/execution/ethereum/core/address.hpp                         |     17 |
+| ./monad/category/execution/ethereum/core/base_ctypes.h                       |     62 |
+| ./monad/category/execution/ethereum/core/block.hpp                           |     50 |
+| ./monad/category/execution/ethereum/core/contract/abi_decode_error.cpp       |     15 |
+| ./monad/category/execution/ethereum/core/contract/abi_decode_error.hpp       |     29 |
+| ./monad/category/execution/ethereum/core/contract/abi_decode.hpp             |     45 |
+| ./monad/category/execution/ethereum/core/contract/abi_encode.hpp             |    117 |
+| ./monad/category/execution/ethereum/core/contract/abi_signatures.hpp         |     21 |
+| ./monad/category/execution/ethereum/core/contract/big_endian.hpp             |     57 |
+| ./monad/category/execution/ethereum/core/contract/checked_math.cpp           |     57 |
+| ./monad/category/execution/ethereum/core/contract/checked_math.hpp           |     37 |
+| ./monad/category/execution/ethereum/core/contract/events.hpp                 |     32 |
+| ./monad/category/execution/ethereum/core/contract/storage_array.hpp          |     57 |
+| ./monad/category/execution/ethereum/core/contract/storage_variable.hpp       |     86 |
+| ./monad/category/execution/ethereum/core/eth_ctypes.h                        |    103 |
+| ./monad/category/execution/ethereum/core/fmt/account_fmt.hpp                 |     31 |
+| ./monad/category/execution/ethereum/core/fmt/address_fmt.hpp                 |     22 |
+| ./monad/category/execution/ethereum/core/fmt/block_fmt.hpp                   |     57 |
+| ./monad/category/execution/ethereum/core/fmt/bytes_fmt.hpp                   |     22 |
+| ./monad/category/execution/ethereum/core/fmt/int_fmt.hpp                     |     19 |
+| ./monad/category/execution/ethereum/core/fmt/receipt_fmt.hpp                 |     56 |
+| ./monad/category/execution/ethereum/core/fmt/signature_fmt.hpp               |     30 |
+| ./monad/category/execution/ethereum/core/fmt/transaction_fmt.hpp             |     94 |
+| ./monad/category/execution/ethereum/core/fmt/withdrawal_fmt.hpp              |     28 |
+| ./monad/category/execution/ethereum/core/log_level_map.hpp                   |     20 |
+| ./monad/category/execution/ethereum/core/receipt.cpp                         |     33 |
+| ./monad/category/execution/ethereum/core/receipt.hpp                         |     31 |
+| ./monad/category/execution/ethereum/core/rlp/account_rlp.cpp                 |     39 |
+| ./monad/category/execution/ethereum/core/rlp/account_rlp.hpp                 |     10 |
+| ./monad/category/execution/ethereum/core/rlp/address_rlp.hpp                 |     44 |
+| ./monad/category/execution/ethereum/core/rlp/block_rlp.cpp                   |    190 |
+| ./monad/category/execution/ethereum/core/rlp/block_rlp.hpp                   |     15 |
+| ./monad/category/execution/ethereum/core/rlp/bytes_rlp.hpp                   |     27 |
+| ./monad/category/execution/ethereum/core/rlp/int_rlp.hpp                     |     30 |
+| ./monad/category/execution/ethereum/core/rlp/receipt_rlp.cpp                 |    153 |
+| ./monad/category/execution/ethereum/core/rlp/receipt_rlp.hpp                 |     18 |
+| ./monad/category/execution/ethereum/core/rlp/signature_rlp.cpp               |     17 |
+| ./monad/category/execution/ethereum/core/rlp/signature_rlp.hpp               |      8 |
+| ./monad/category/execution/ethereum/core/rlp/transaction_rlp.cpp             |    320 |
+| ./monad/category/execution/ethereum/core/rlp/transaction_rlp.hpp             |     22 |
+| ./monad/category/execution/ethereum/core/rlp/withdrawal_rlp.cpp              |     55 |
+| ./monad/category/execution/ethereum/core/rlp/withdrawal_rlp.hpp              |     11 |
+| ./monad/category/execution/ethereum/core/signature.cpp                       |     30 |
+| ./monad/category/execution/ethereum/core/signature.hpp                       |     18 |
+| ./monad/category/execution/ethereum/core/transaction.cpp                     |     57 |
+| ./monad/category/execution/ethereum/core/transaction.hpp                     |     67 |
+| ./monad/category/execution/ethereum/core/variant.hpp                         |     11 |
+| ./monad/category/execution/ethereum/core/withdrawal.hpp                      |     15 |
+| ./monad/category/execution/ethereum/create_contract_address.cpp              |     36 |
+| ./monad/category/execution/ethereum/create_contract_address.hpp              |     11 |
+| ./monad/category/execution/ethereum/dao.hpp                                  |    144 |
+| ./monad/category/execution/ethereum/db/db_cache.hpp                          |    199 |
+| ./monad/category/execution/ethereum/db/db_snapshot_filesystem.cpp            |    176 |
+| ./monad/category/execution/ethereum/db/db_snapshot_filesystem.h              |     21 |
+| ./monad/category/execution/ethereum/db/db_snapshot.cpp                       |    422 |
+| ./monad/category/execution/ethereum/db/db_snapshot.h                         |     35 |
+| ./monad/category/execution/ethereum/db/db.hpp                                |     70 |
+| ./monad/category/execution/ethereum/db/file_db.cpp                           |     78 |
+| ./monad/category/execution/ethereum/db/file_db.hpp                           |     22 |
+| ./monad/category/execution/ethereum/db/trie_db.cpp                           |    641 |
+| ./monad/category/execution/ethereum/db/trie_db.hpp                           |     89 |
+| ./monad/category/execution/ethereum/db/trie_rodb.hpp                         |    151 |
+| ./monad/category/execution/ethereum/db/util.cpp                              |    848 |
+| ./monad/category/execution/ethereum/db/util.hpp                              |    128 |
+| ./monad/category/execution/ethereum/dispatch_transaction.cpp                 |     30 |
+| ./monad/category/execution/ethereum/dispatch_transaction.hpp                 |     34 |
+| ./monad/category/execution/ethereum/event/exec_event_ctypes_metadata.c       |    132 |
+| ./monad/category/execution/ethereum/event/exec_event_ctypes.h                |    177 |
+| ./monad/category/execution/ethereum/event/exec_event_recorder.cpp            |    103 |
+| ./monad/category/execution/ethereum/event/exec_event_recorder.hpp            |    182 |
+| ./monad/category/execution/ethereum/event/exec_iter_help_inline.h            |    281 |
+| ./monad/category/execution/ethereum/event/exec_iter_help.h                   |     38 |
+| ./monad/category/execution/ethereum/event/record_block_events.cpp            |    107 |
+| ./monad/category/execution/ethereum/event/record_block_events.hpp            |     24 |
+| ./monad/category/execution/ethereum/event/record_txn_events.cpp              |    160 |
+| ./monad/category/execution/ethereum/event/record_txn_events.hpp              |     15 |
+| ./monad/category/execution/ethereum/evm.cpp                                  |    249 |
+| ./monad/category/execution/ethereum/evm.hpp                                  |     22 |
+| ./monad/category/execution/ethereum/evmc_host.cpp                            |    175 |
+| ./monad/category/execution/ethereum/evmc_host.hpp                            |    155 |
+| ./monad/category/execution/ethereum/execute_block.cpp                        |    268 |
+| ./monad/category/execution/ethereum/execute_block.hpp                        |     33 |
+| ./monad/category/execution/ethereum/execute_transaction.cpp                  |    365 |
+| ./monad/category/execution/ethereum/execute_transaction.hpp                  |     81 |
+| ./monad/category/execution/ethereum/fmt/event_trace_fmt.hpp                  |     13 |
+| ./monad/category/execution/ethereum/metrics/block_metrics.hpp                |     27 |
+| ./monad/category/execution/ethereum/precompiles_bls12.cpp                    |    352 |
+| ./monad/category/execution/ethereum/precompiles_bls12.hpp                    |     90 |
+| ./monad/category/execution/ethereum/precompiles_impl.cpp                     |    364 |
+| ./monad/category/execution/ethereum/precompiles.cpp                          |    122 |
+| ./monad/category/execution/ethereum/precompiles.hpp                          |     81 |
+| ./monad/category/execution/ethereum/rlp/config.hpp                           |      8 |
+| ./monad/category/execution/ethereum/rlp/decode_error.cpp                     |     29 |
+| ./monad/category/execution/ethereum/rlp/decode_error.hpp                     |     34 |
+| ./monad/category/execution/ethereum/rlp/decode.hpp                           |    121 |
+| ./monad/category/execution/ethereum/rlp/encode2.hpp                          |     62 |
+| ./monad/category/execution/ethereum/state2/block_state.cpp                   |    213 |
+| ./monad/category/execution/ethereum/state2/block_state.hpp                   |     43 |
+| ./monad/category/execution/ethereum/state2/fmt/state_deltas_fmt.hpp          |     81 |
+| ./monad/category/execution/ethereum/state2/state_deltas.hpp                  |     40 |
+| ./monad/category/execution/ethereum/state3/account_state.cpp                 |     50 |
+| ./monad/category/execution/ethereum/state3/account_state.hpp                 |    106 |
+| ./monad/category/execution/ethereum/state3/account_substate.hpp              |     61 |
+| ./monad/category/execution/ethereum/state3/state.cpp                         |      1 |
+| ./monad/category/execution/ethereum/state3/state.hpp                         |    550 |
+| ./monad/category/execution/ethereum/state3/version_stack.hpp                 |     75 |
+| ./monad/category/execution/ethereum/trace/call_frame.cpp                     |     56 |
+| ./monad/category/execution/ethereum/trace/call_frame.hpp                     |     37 |
+| ./monad/category/execution/ethereum/trace/call_tracer.cpp                    |    166 |
+| ./monad/category/execution/ethereum/trace/call_tracer.hpp                    |     50 |
+| ./monad/category/execution/ethereum/trace/event_trace.cpp                    |     54 |
+| ./monad/category/execution/ethereum/trace/event_trace.hpp                    |     70 |
+| ./monad/category/execution/ethereum/trace/prestate_tracer.cpp                |    225 |
+| ./monad/category/execution/ethereum/trace/prestate_tracer.hpp                |     49 |
+| ./monad/category/execution/ethereum/trace/rlp/call_frame_rlp.cpp             |     74 |
+| ./monad/category/execution/ethereum/trace/rlp/call_frame_rlp.hpp             |     13 |
+| ./monad/category/execution/ethereum/trace/tracer_config.h                    |     15 |
+| ./monad/category/execution/ethereum/transaction_gas.cpp                      |    188 |
+| ./monad/category/execution/ethereum/transaction_gas.hpp                      |     41 |
+| ./monad/category/execution/ethereum/tx_context.cpp                           |     42 |
+| ./monad/category/execution/ethereum/tx_context.hpp                           |     30 |
+| ./monad/category/execution/ethereum/types/fmt/incarnation_fmt.hpp            |     27 |
+| ./monad/category/execution/ethereum/types/incarnation.hpp                    |     39 |
+| ./monad/category/execution/ethereum/validate_block.cpp                       |    215 |
+| ./monad/category/execution/ethereum/validate_block.hpp                       |     58 |
+| ./monad/category/execution/ethereum/validate_transaction.cpp                 |    217 |
+| ./monad/category/execution/ethereum/validate_transaction.hpp                 |     63 |
+| ./monad/category/execution/monad/chain/monad_chain.cpp                       |    229 |
+| ./monad/category/execution/monad/chain/monad_chain.hpp                       |     56 |
+| ./monad/category/execution/monad/chain/monad_devnet_alloc.hpp                |    278 |
+| ./monad/category/execution/monad/chain/monad_devnet.cpp                      |     26 |
+| ./monad/category/execution/monad/chain/monad_devnet.hpp                      |     15 |
+| ./monad/category/execution/monad/chain/monad_mainnet_alloc.hpp               |     11 |
+| ./monad/category/execution/monad/chain/monad_mainnet.cpp                     |     37 |
+| ./monad/category/execution/monad/chain/monad_mainnet.hpp                     |     15 |
+| ./monad/category/execution/monad/chain/monad_transaction_error.cpp           |     20 |
+| ./monad/category/execution/monad/chain/monad_transaction_error.hpp           |     30 |
+| ./monad/category/execution/monad/core/monad_block.hpp                        |    140 |
+| ./monad/category/execution/monad/core/monad_ctypes.h                         |     15 |
+| ./monad/category/execution/monad/core/rlp/monad_block_rlp.cpp                |    166 |
+| ./monad/category/execution/monad/core/rlp/monad_block_rlp.hpp                |     12 |
+| ./monad/category/execution/monad/dispatch_transaction.cpp                    |     46 |
+| ./monad/category/execution/monad/dispatch_transaction.hpp                    |     14 |
+| ./monad/category/execution/monad/event/record_consensus_events.cpp           |     63 |
+| ./monad/category/execution/monad/event/record_consensus_events.hpp           |     12 |
+| ./monad/category/execution/monad/execute_system_transaction.cpp              |    170 |
+| ./monad/category/execution/monad/execute_system_transaction.hpp              |     32 |
+| ./monad/category/execution/monad/min_base_fee.cpp                            |      5 |
+| ./monad/category/execution/monad/min_base_fee.h                              |     11 |
+| ./monad/category/execution/monad/monad_precompiles_impl.cpp                  |     66 |
+| ./monad/category/execution/monad/monad_precompiles.cpp                       |     58 |
+| ./monad/category/execution/monad/monad_precompiles.hpp                       |     14 |
+| ./monad/category/execution/monad/monad_transaction_gas.cpp                   |     28 |
+| ./monad/category/execution/monad/monad_transaction_gas.hpp                   |     11 |
+| ./monad/category/execution/monad/reserve_balance.cpp                         |      5 |
+| ./monad/category/execution/monad/reserve_balance.h                           |     11 |
+| ./monad/category/execution/monad/staking/config.hpp                          |     15 |
+| ./monad/category/execution/monad/staking/read_valset.cpp                     |     57 |
+| ./monad/category/execution/monad/staking/read_valset.hpp                     |     22 |
+| ./monad/category/execution/monad/staking/staking_contract.cpp                |   1524 |
+| ./monad/category/execution/monad/staking/staking_contract.hpp                |    308 |
+| ./monad/category/execution/monad/staking/util/bls.cpp                        |     16 |
+| ./monad/category/execution/monad/staking/util/bls.hpp                        |     66 |
+| ./monad/category/execution/monad/staking/util/consensus_view.cpp             |     11 |
+| ./monad/category/execution/monad/staking/util/consensus_view.hpp             |     36 |
+| ./monad/category/execution/monad/staking/util/constants.hpp                  |     35 |
+| ./monad/category/execution/monad/staking/util/delegator.cpp                  |     11 |
+| ./monad/category/execution/monad/staking/util/delegator.hpp                  |    130 |
+| ./monad/category/execution/monad/staking/util/secp256k1.cpp                  |     24 |
+| ./monad/category/execution/monad/staking/util/secp256k1.hpp                  |     71 |
+| ./monad/category/execution/monad/staking/util/staking_error.cpp              |     54 |
+| ./monad/category/execution/monad/staking/util/staking_error.hpp              |     53 |
+| ./monad/category/execution/monad/staking/util/val_execution.cpp              |     12 |
+| ./monad/category/execution/monad/staking/util/val_execution.hpp              |    107 |
+| ./monad/category/execution/monad/state2/proposal_state.hpp                   |    205 |
+| ./monad/category/execution/monad/system_sender.hpp                           |      8 |
+| ./monad/category/execution/monad/validate_monad_block.cpp                    |     72 |
+| ./monad/category/execution/monad/validate_monad_block.hpp                    |     38 |
+| ./monad/category/execution/monad/validate_system_transaction.cpp             |     92 |
+| ./monad/category/execution/monad/validate_system_transaction.hpp             |     46 |
+| ./monad/category/mpt/bench/async_read_bench.cpp                              |    472 |
+| ./monad/category/mpt/cli_tool_impl.cpp                                       |   1526 |
+| ./monad/category/mpt/cli_tool_impl.hpp                                       |      6 |
+| ./monad/category/mpt/cli_tool_main.cpp                                       |     14 |
+| ./monad/category/mpt/compute.cpp                                             |    100 |
+| ./monad/category/mpt/compute.hpp                                             |    313 |
+| ./monad/category/mpt/config.hpp                                              |     13 |
+| ./monad/category/mpt/copy_trie.cpp                                           |    280 |
+| ./monad/category/mpt/db_error.hpp                                            |     37 |
+| ./monad/category/mpt/db.cpp                                                  |   1441 |
+| ./monad/category/mpt/db.hpp                                                  |    215 |
+| ./monad/category/mpt/deserialize_node_from_receiver_result.hpp               |     71 |
+| ./monad/category/mpt/detail/boost_fiber_workarounds.hpp                      |    290 |
+| ./monad/category/mpt/detail/collected_stats.hpp                              |     44 |
+| ./monad/category/mpt/detail/db_metadata.hpp                                  |    461 |
+| ./monad/category/mpt/detail/kbhit.hpp                                        |     65 |
+| ./monad/category/mpt/detail/unsigned_20.hpp                                  |     76 |
+| ./monad/category/mpt/find_notify_fiber.cpp                                   |    385 |
+| ./monad/category/mpt/find_request_sender.hpp                                 |    256 |
+| ./monad/category/mpt/find.cpp                                                |     65 |
+| ./monad/category/mpt/merkle/compact_encode.hpp                               |     31 |
+| ./monad/category/mpt/merkle/node_reference.hpp                               |     21 |
+| ./monad/category/mpt/nibbles_view_fmt.hpp                                    |     22 |
+| ./monad/category/mpt/nibbles_view.hpp                                        |    300 |
+| ./monad/category/mpt/node_cache.hpp                                          |     64 |
+| ./monad/category/mpt/node_cursor.hpp                                         |     54 |
+| ./monad/category/mpt/node_disas.cpp                                          |     36 |
+| ./monad/category/mpt/node.cpp                                                |    498 |
+| ./monad/category/mpt/node.hpp                                                |    369 |
+| ./monad/category/mpt/ondisk_db_config.hpp                                    |     39 |
+| ./monad/category/mpt/read_node_blocking.cpp                                  |     53 |
+| ./monad/category/mpt/request.hpp                                             |     73 |
+| ./monad/category/mpt/state_machine.hpp                                       |     22 |
+| ./monad/category/mpt/traverse_util.hpp                                       |     78 |
+| ./monad/category/mpt/traverse.hpp                                            |    332 |
+| ./monad/category/mpt/trie.cpp                                                |   1662 |
+| ./monad/category/mpt/trie.hpp                                                |    892 |
+| ./monad/category/mpt/update_aux.cpp                                          |   1478 |
+| ./monad/category/mpt/update.hpp                                              |     59 |
+| ./monad/category/mpt/upward_tnode.hpp                                        |    225 |
+| ./monad/category/mpt/util.hpp                                                |    242 |
+| ./monad/category/rpc/eth_call.cpp                                            |    772 |
+| ./monad/category/rpc/eth_call.h                                              |     61 |
+| ./monad/category/statesync/statesync_client_context.cpp                      |    118 |
+| ./monad/category/statesync/statesync_client_context.hpp                      |     47 |
+| ./monad/category/statesync/statesync_client.cpp                              |    178 |
+| ./monad/category/statesync/statesync_client.h                                |     33 |
+| ./monad/category/statesync/statesync_messages.h                              |     45 |
+| ./monad/category/statesync/statesync_protocol.cpp                            |    211 |
+| ./monad/category/statesync/statesync_protocol.hpp                            |     23 |
+| ./monad/category/statesync/statesync_server_context.cpp                      |    259 |
+| ./monad/category/statesync/statesync_server_context.hpp                      |     96 |
+| ./monad/category/statesync/statesync_server_network.hpp                      |    149 |
+| ./monad/category/statesync/statesync_server.cpp                              |    339 |
+| ./monad/category/statesync/statesync_server.h                                |     18 |
+| ./monad/category/statesync/statesync_version.cpp                             |     10 |
+| ./monad/category/statesync/statesync_version.h                               |     11 |
+| ./monad/category/vm/code.hpp                                                 |     61 |
+| ./monad/category/vm/compiler.cpp                                             |    125 |
+| ./monad/category/vm/compiler.hpp                                             |    184 |
+| ./monad/category/vm/compiler/ir/basic_blocks.cpp                             |     65 |
+| ./monad/category/vm/compiler/ir/basic_blocks.hpp                             |    420 |
+| ./monad/category/vm/compiler/ir/instruction.hpp                              |    405 |
+| ./monad/category/vm/compiler/ir/poly_typed.cpp                               |    486 |
+| ./monad/category/vm/compiler/ir/poly_typed.hpp                               |     26 |
+| ./monad/category/vm/compiler/ir/x86.cpp                                      |    439 |
+| ./monad/category/vm/compiler/ir/x86.hpp                                      |     28 |
+| ./monad/category/vm/compiler/ir/x86/emitter.cpp                              |   6291 |
+| ./monad/category/vm/compiler/ir/x86/emitter.hpp                              |    827 |
+| ./monad/category/vm/compiler/ir/x86/types.hpp                                |    105 |
+| ./monad/category/vm/compiler/ir/x86/virtual_stack.cpp                        |    763 |
+| ./monad/category/vm/compiler/ir/x86/virtual_stack.hpp                        |    405 |
+| ./monad/category/vm/compiler/types.hpp                                       |     11 |
+| ./monad/category/vm/core/assert.cpp                                          |     16 |
+| ./monad/category/vm/core/assert.h                                            |     48 |
+| ./monad/category/vm/core/cases.hpp                                           |      9 |
+| ./monad/category/vm/evm/delegation.cpp                                       |     56 |
+| ./monad/category/vm/evm/delegation.hpp                                       |     11 |
+| ./monad/category/vm/evm/explicit_traits.hpp                                  |    138 |
+| ./monad/category/vm/evm/monad/revision.h                                     |     16 |
+| ./monad/category/vm/evm/opcodes_xmacro.hpp                                   |    266 |
+| ./monad/category/vm/evm/opcodes.hpp                                          |    713 |
+| ./monad/category/vm/evm/switch_traits.hpp                                    |     53 |
+| ./monad/category/vm/evm/traits.hpp                                           |    148 |
+| ./monad/category/vm/host.hpp                                                 |     42 |
+| ./monad/category/vm/interpreter/call_runtime.hpp                             |     66 |
+| ./monad/category/vm/interpreter/debug.hpp                                    |     45 |
+| ./monad/category/vm/interpreter/entry.S                                      |     17 |
+| ./monad/category/vm/interpreter/execute.cpp                                  |     53 |
+| ./monad/category/vm/interpreter/execute.hpp                                  |     13 |
+| ./monad/category/vm/interpreter/instruction_stats.cpp                        |     65 |
+| ./monad/category/vm/interpreter/instruction_stats.hpp                        |     12 |
+| ./monad/category/vm/interpreter/instruction_table.hpp                        |   1550 |
+| ./monad/category/vm/interpreter/instructions_fwd.hpp                         |    342 |
+| ./monad/category/vm/interpreter/intercode.cpp                                |     47 |
+| ./monad/category/vm/interpreter/intercode.hpp                                |     51 |
+| ./monad/category/vm/interpreter/push.hpp                                     |    196 |
+| ./monad/category/vm/interpreter/stack.hpp                                    |     66 |
+| ./monad/category/vm/interpreter/types.hpp                                    |     30 |
+| ./monad/category/vm/runtime/allocator.cpp                                    |      7 |
+| ./monad/category/vm/runtime/allocator.hpp                                    |     21 |
+| ./monad/category/vm/runtime/bin.hpp                                          |    107 |
+| ./monad/category/vm/runtime/cached_allocator.hpp                             |    113 |
+| ./monad/category/vm/runtime/call.hpp                                         |    225 |
+| ./monad/category/vm/runtime/context.cpp                                      |    199 |
+| ./monad/category/vm/runtime/context.S                                        |     67 |
+| ./monad/category/vm/runtime/create.hpp                                       |    114 |
+| ./monad/category/vm/runtime/data.hpp                                         |    171 |
+| ./monad/category/vm/runtime/detail.hpp                                       |    125 |
+| ./monad/category/vm/runtime/environment.hpp                                  |     43 |
+| ./monad/category/vm/runtime/exit.cpp                                         |     22 |
+| ./monad/category/vm/runtime/exit.S                                           |     15 |
+| ./monad/category/vm/runtime/keccak.hpp                                       |     24 |
+| ./monad/category/vm/runtime/log.hpp                                          |     90 |
+| ./monad/category/vm/runtime/math.hpp                                         |     93 |
+| ./monad/category/vm/runtime/math.S                                           |     85 |
+| ./monad/category/vm/runtime/memory.hpp                                       |     41 |
+| ./monad/category/vm/runtime/runtime.hpp                                      |     14 |
+| ./monad/category/vm/runtime/selfdestruct.hpp                                 |     49 |
+| ./monad/category/vm/runtime/storage_costs.hpp                                |    297 |
+| ./monad/category/vm/runtime/storage.cpp                                      |     44 |
+| ./monad/category/vm/runtime/storage.hpp                                      |     82 |
+| ./monad/category/vm/runtime/transmute.hpp                                    |     96 |
+| ./monad/category/vm/runtime/transmute.S                                      |     87 |
+| ./monad/category/vm/runtime/types.hpp                                        |    280 |
+| ./monad/category/vm/runtime/uint256.cpp                                      |     79 |
+| ./monad/category/vm/runtime/uint256.hpp                                      |   1061 |
+| ./monad/category/vm/utils/debug.cpp                                          |     11 |
+| ./monad/category/vm/utils/debug.hpp                                          |     19 |
+| ./monad/category/vm/utils/evm-as.hpp                                         |     74 |
+| ./monad/category/vm/utils/evm-as/builder.hpp                                 |    624 |
+| ./monad/category/vm/utils/evm-as/compiler.cpp                                |     63 |
+| ./monad/category/vm/utils/evm-as/compiler.hpp                                |    321 |
+| ./monad/category/vm/utils/evm-as/instruction.hpp                             |    191 |
+| ./monad/category/vm/utils/evm-as/kernel-builder.hpp                          |    329 |
+| ./monad/category/vm/utils/evm-as/resolver.hpp                                |     96 |
+| ./monad/category/vm/utils/evm-as/utils.hpp                                   |     14 |
+| ./monad/category/vm/utils/evm-as/validator.hpp                               |    171 |
+| ./monad/category/vm/utils/evmc_utils.cpp                                     |     15 |
+| ./monad/category/vm/utils/evmc_utils.hpp                                     |     46 |
+| ./monad/category/vm/utils/load_program.hpp                                   |     37 |
+| ./monad/category/vm/utils/log_utils.hpp                                      |     43 |
+| ./monad/category/vm/utils/lru_weight_cache.hpp                               |    244 |
+| ./monad/category/vm/utils/parser.cpp                                         |    291 |
+| ./monad/category/vm/utils/parser.hpp                                         |     19 |
+| ./monad/category/vm/utils/rc_ptr.hpp                                         |    139 |
+| ./monad/category/vm/utils/scope_exit.hpp                                     |     49 |
+| ./monad/category/vm/utils/traits.hpp                                         |     10 |
+| ./monad/category/vm/varcode_cache.cpp                                        |     49 |
+| ./monad/category/vm/varcode_cache.hpp                                        |     46 |
+| ./monad/category/vm/vm.cpp                                                   |    174 |
+| ./monad/category/vm/vm.hpp                                                   |    183 |
+| Sum                                                                          | 164758 |
 
-| Contract | SLOC | Purpose | Libraries used |  
-| ----------- | ----------- | ----------- | ----------- |
-| [contracts/folder/sample.sol](https://github.com/code-423n4/repo-name/blob/contracts/folder/sample.sol) | 123 | This contract does XYZ | [`@openzeppelin/*`](https://openzeppelin.com/contracts/) |
 
 ### Files out of scope
-✅ SCOUTS: List files/directories out of scope
 
 Any code not reachable via a running node under default configuration (e.g., test, mock or fuzzing code) is out of scope. Any project, development, build configuration or build, scripting or other miscellaneous development or testing files are out of scope. 
 
 Findings concerning known vulnerabilities within third-party dependencies (‘**/third_party/*’) themselves are out of scope. However, a bug is considered a valid finding if it leads to a protocol-level vulnerability.
 
 Any proof of concepts must demonstrate how the report is triggerable by an attacker, outlining the full attack path on a default node configuration, which exploits in-scope code.
+
 
 # Additional context
 
@@ -167,23 +890,31 @@ The team's primary concerns for the Monad protocol are focused on the following 
   -	**Purpose:** Trusted nodes that provide state synchronization data during initial sync or catch-up 
   -	**Who can be a StateSync Peer:** Nodes explicitly configured in the `state_sync_peers` list, which defaults to bootstrap nodes if none specified
 
-✅ SCOUTS: Please format the response above 👆 using the template below👇
-
-| Role                                | Description                       |
-| --------------------------------------- | ---------------------------- |
-| Owner                          | Has superpowers                |
-| Administrator                             | Can change fees                       |
-
 ## Running tests
 
-`monad-bft`:
 
-```
-git clone https://github.com/category-labs/monad-bft.git && cd monad-bft
-git submodule update --init --recursive
+```bash
+git clone https://github.com/code-423n4/2025-09-monad.git --recursive
+cd 2025-09-monad.git
 
-cd monad-<insert crate name>
+
+# for monad-bft:
+cd bft/monad-<insert crate name>
 cargo test
+
+# To run all tests at once, from the main folder
+cd bft
+cargo test --workspace
+
+
+# for monad, run the following from the main folder
+# Whole project tests
+./monad/scripts/configure.sh
+./monad/scripts/build.sh
+./monad/scripts/test.sh
+
+# VM Specific tests (after running the project tests above)
+./monad/build/test/vm/unit/vm-unit-tests
 ```
 Note: Individual crate tests can be run from each crate as standard
 
@@ -192,45 +923,13 @@ To run a consensus client + execution client + JsonRPC:
 2.	nets/run.sh
 
 
-`monad`:
-
-See this README.md for more detailed information.
-```
-git clone https://github.com/category-labs/monad.git && cd monad
-git submodule update --init --recursive
-
-# Whole project tests
-./scripts/configure.sh
-./scripts/build.sh
-./scripts/test.sh
-
-# VM Specific tests (after running the project tests above)
-./build/test/vm/unit/vm-unit-tests
-```
 
 **Additional Comments**
 
 The codebase uses features of the Linux kernel and makes use of instructions specific to x86 such as AVX. It further requires Rust 1.87 and Clang 19 or newer.
 
-For more information on build environment configuration, you can refer to the docker build configurations: https://github.com/category-labs/monad/blob/8cd73a6186366fe52529ab1050b2e6a388af4893/docker/release.Dockerfile#L1-L87 
+For more information on build environment configuration, you can refer to [the docker build configurations](https://github.com/category-labs/monad/blob/8cd73a6186366fe52529ab1050b2e6a388af4893/docker/release.Dockerfile#L1-L87)
 
-✅ SCOUTS: Please format the response above 👆 using the template below👇
-
-```bash
-git clone https://github.com/code-423n4/2023-08-arbitrum
-git submodule update --init --recursive
-cd governance
-foundryup
-make install
-make build
-make sc-election-test
-```
-To run code coverage
-```bash
-make coverage
-```
-
-✅ SCOUTS: Add a screenshot of your terminal showing the test coverage
 
 ## Miscellaneous
 Employees of Category Labs or Asymmetric Research, and employees' family members are ineligible to participate in this audit.
