@@ -95,7 +95,7 @@ Contains the Monad consensus client and JsonRpc server. Monad consensus collects
 
 ## Links
 
-- **Previous audits:**  ✅ 
+- **Previous audits:**  ✅ - previously audited by Zellic and Spearbit, reports being finalized.
 - **Documentation:** https://docs.monad.xyz
 - **Website:** https://www.monad.xyz
 - **X/Twitter:** https://x.com/monad
