@@ -95,7 +95,7 @@ Contains the Monad consensus client and JsonRpc server. Monad consensus collects
 
 ## Links
 
-- **Previous audits:**  ✅ 
+- **Previous audits:** previously audited by Zellic and Spearbit, reports being finalized.
 - **Documentation:** https://docs.monad.xyz
 - **Website:** https://www.monad.xyz
 - **X/Twitter:** https://x.com/monad
@@ -740,8 +740,6 @@ Contains the Monad consensus client and JsonRpc server. Monad consensus collects
 | ./monad/category/vm/compiler/ir/basic_blocks.cpp                             |     65 |
 | ./monad/category/vm/compiler/ir/basic_blocks.hpp                             |    420 |
 | ./monad/category/vm/compiler/ir/instruction.hpp                              |    405 |
-| ./monad/category/vm/compiler/ir/poly_typed.cpp                               |    486 |
-| ./monad/category/vm/compiler/ir/poly_typed.hpp                               |     26 |
 | ./monad/category/vm/compiler/ir/x86.cpp                                      |    439 |
 | ./monad/category/vm/compiler/ir/x86.hpp                                      |     28 |
 | ./monad/category/vm/compiler/ir/x86/emitter.cpp                              |   6291 |
@@ -892,6 +890,10 @@ The team's primary concerns for the Monad protocol are focused on the following 
 
 ## Running tests
 
+More detailed information about requirements and recommended build procedures are found in the individual
+`README.md` files for the respective directories:
+- [`monad`](./monad/README.md#building-the-source-code)
+- [`bft`](./bft/README.md#getting-started)
 
 ```bash
 git clone https://github.com/code-423n4/2025-09-monad.git --recursive
