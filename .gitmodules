@@ -1,55 +1,55 @@
 [submodule "third_party/blst"]
-	path = third_party/blst
+	path = prefix/third_party/blst
 	url = https://github.com/supranational/blst.git
 [submodule "third_party/concurrentqueue"]
-	path = third_party/concurrentqueue
+	path = prefix/third_party/concurrentqueue
 	url = https://github.com/cameron314/concurrentqueue
 [submodule "third_party/ethereum-tests"]
-	path = third_party/ethereum-tests
+	path = prefix/third_party/ethereum-tests
 	url = https://github.com/ethereum/tests
 [submodule "third_party/execution-specs"]
-	path = third_party/execution-specs
+	path = prefix/third_party/execution-specs
 	url = https://github.com/ethereum/execution-specs.git
 [submodule "third_party/intx"]
-	path = third_party/intx
+	path = prefix/third_party/intx
 	url = https://github.com/chfast/intx.git
 	branch = master
 [submodule "third_party/komihash"]
-	path = third_party/komihash
+	path = prefix/third_party/komihash
 	url = https://github.com/avaneev/komihash.git
 [submodule "third_party/quill"]
-	path = third_party/quill
+	path = prefix/third_party/quill
 	url = https://github.com/odygrd/quill.git
 [submodule "third_party/silkpre"]
-	path = third_party/silkpre
+	path = prefix/third_party/silkpre
 	url = https://github.com/category-labs/silkpre.git
 [submodule "third_party/yellowpaper"]
-	path = third_party/yellowpaper
+	path = prefix/third_party/yellowpaper
 	url = https://github.com/ethereum/yellowpaper.git
 [submodule "ethash"]
-	path = third_party/ethash
+	path = prefix/third_party/ethash
 	url = https://github.com/chfast/ethash.git
 [submodule "core/third_party/nanobench"]
-	path = category/core/third_party/nanobench
+	path = prefix/category/core/third_party/nanobench
 	url = https://github.com/martinus/nanobench.git
 [submodule "core/third_party/nlohmann_json"]
-	path = category/core/third_party/nlohmann_json
+	path = prefix/category/core/third_party/nlohmann_json
 	url = https://github.com/nlohmann/json.git
 [submodule "core/third_party/unordered_dense"]
-	path = category/core/third_party/unordered_dense
+	path = prefix/category/core/third_party/unordered_dense
 	url = https://github.com/martinus/unordered_dense.git
 [submodule "third_party/BLAKE3"]
-	path = third_party/BLAKE3
+	path = prefix/third_party/BLAKE3
 	url = https://github.com/BLAKE3-team/BLAKE3.git
 [submodule "third_party/c-kzg-4844"]
-	path = third_party/c-kzg-4844
+	path = prefix/third_party/c-kzg-4844
 	url = https://github.com/ethereum/c-kzg-4844.git
 [submodule "libs/vm/third_party/asmjit"]
-	path = third_party/asmjit
+	path = prefix/third_party/asmjit
 	url = git@github.com:asmjit/asmjit.git
 [submodule "third_party/evmc"]
-	path = third_party/evmc
+	path = prefix/third_party/evmc
 	url = https://github.com/ipsilon/evmc.git
 [submodule "third_party/cthash"]
-	path = third_party/cthash
+	path = prefix/third_party/cthash
 	url = https://github.com/hanickadot/cthash.git
