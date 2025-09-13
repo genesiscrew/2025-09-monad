@@ -1,0 +1,21 @@
+**/Dockerfile
+.dockerignore
+
+.github
+
+/docker/devnet/monad/ledger
+/docker/devnet/monad/bft-ledger
+/docker/devnet/monad/block-payload
+/docker/devnet/monad/triedb
+/docker/devnet/monad/wal
+/docker/devnet/monad/mempool.sock
+/docker/single-node/logs
+
+# unfortunately some submodules and rpc's build script require .git folder to exist...
+!/.git
+
+**/target
+
+**/*.data
+**/*.data.old
+**/*.svg

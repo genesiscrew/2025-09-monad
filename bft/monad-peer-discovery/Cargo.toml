@@ -1,0 +1,28 @@
+[package]
+name = "monad-peer-discovery"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+monad-crypto = { workspace = true }
+monad-executor = { workspace = true }
+monad-executor-glue = { workspace = true }
+monad-types = { workspace = true }
+
+alloy-rlp = { workspace = true }
+futures = { workspace = true }
+rand = { workspace = true }
+rand_chacha = { workspace = true }
+tracing = { workspace = true }
+tokio-util = { workspace = true, features = ["time"] }
+
+[dev-dependencies]
+monad-keystore = { workspace = true }
+monad-node-config = { workspace = true, features = ["crypto"] }
+monad-secp = { workspace = true }
+monad-testutil = { workspace = true }
+
+clap = { workspace = true, features = ["derive"] }
+hex = { workspace = true }
+test-case = { workspace = true }
+toml = { workspace = true }
