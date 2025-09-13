@@ -890,6 +890,10 @@ The team's primary concerns for the Monad protocol are focused on the following 
 
 ## Running tests
 
+More detailed information about requirements and recommended build procedures are found in the individual
+`README.md` files for the respective directories:
+- [`monad`](./monad/README.md#building-the-source-code)
+- [`bft`](./bft/README.md#getting-started)
 
 ```bash
 git clone https://github.com/code-423n4/2025-09-monad.git --recursive
