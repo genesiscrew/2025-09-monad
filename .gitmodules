@@ -53,3 +53,9 @@
 [submodule "third_party/cthash"]
 	path = monad/third_party/cthash
 	url = https://github.com/hanickadot/cthash.git
+[submodule "monad-cxx/monad-execution"]
+	path = bft/monad-cxx/monad-execution
+	url = git@github.com:category-labs/monad.git
+[submodule "manytrace"]
+	path = bft/manytrace
+	url = https://github.com/category-labs/manytrace.git
