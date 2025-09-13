@@ -1,0 +1,56 @@
+[package]
+name = "monad-raptorcast"
+version = "0.1.0"
+edition = "2021"
+
+# this is necessary for criterion bench options
+# https://bheisler.github.io/criterion.rs/book/faq.html#cargo-bench-gives-unrecognized-option-errors-for-valid-command-line-options
+[lib]
+bench = false
+
+[dependencies]
+monad-compress = { workspace = true }
+monad-crypto = { workspace = true }
+monad-dataplane = { workspace = true }
+monad-executor = { workspace = true }
+monad-executor-glue = { workspace = true }
+monad-merkle = { workspace = true }
+monad-node-config = { workspace = true }
+monad-peer-discovery = { workspace = true }
+monad-raptor = { workspace = true }
+monad-secp = { workspace = true }
+monad-types = { workspace = true }
+monad-validator = { workspace = true }
+
+alloy-rlp = { workspace = true }
+bitvec = { workspace = true }
+bytes = { workspace = true }
+fixed = { workspace = true}
+futures = { workspace = true }
+hex = { workspace = true }
+iset = { workspace = true }
+itertools = { workspace = true }
+lru = { workspace = true }
+rand = { workspace = true }
+rand_chacha = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+tokio = { workspace = true }
+
+[dev-dependencies]
+monad-testutil = { workspace = true }
+
+clap = { workspace = true, features = ["derive"] }
+rstest = { workspace = true }
+criterion = { workspace = true }
+futures-util = { workspace = true }
+insta = { workspace = true }
+tokio = { workspace = true, features = ["macros", "rt-multi-thread", "sync"] }
+tracing-subscriber = { workspace = true, features = ["env-filter"] }
+
+[[bench]]
+name = "raptor_bench"
+harness = false
+
+[[example]]
+name = "service"

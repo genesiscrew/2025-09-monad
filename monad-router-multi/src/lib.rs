@@ -1,0 +1,396 @@
+// Copyright (C) 2025 Category Labs, Inc.
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+use std::{
+    collections::{BTreeMap, BTreeSet},
+    marker::PhantomData,
+    pin::Pin,
+    sync::{Arc, Mutex},
+    task::Poll,
+    time::Duration,
+};
+
+use alloy_rlp::{Decodable, Encodable};
+use futures::{Stream, StreamExt};
+use monad_crypto::certificate_signature::{
+    CertificateSignaturePubKey, CertificateSignatureRecoverable,
+};
+use monad_dataplane::{DataplaneBuilder, DataplaneWriter};
+use monad_executor::{Executor, ExecutorMetricsChain};
+use monad_executor_glue::{Message, RouterCommand};
+use monad_node_config::fullnode_raptorcast::SecondaryRaptorCastModeConfig;
+use monad_peer_discovery::{
+    driver::PeerDiscoveryDriver, PeerDiscoveryAlgo, PeerDiscoveryAlgoBuilder,
+};
+use monad_raptorcast::{
+    config::{
+        GroupSchedulingConfig, RaptorCastConfig, RaptorCastConfigSecondary,
+        RaptorCastConfigSecondaryClient, RaptorCastConfigSecondaryPublisher,
+        SecondaryRaptorCastMode,
+    },
+    raptorcast_secondary::{group_message::FullNodesGroupMessage, RaptorCastSecondary},
+    util::Group,
+    RaptorCast, RaptorCastEvent,
+};
+use monad_types::{Epoch, NodeId};
+use tokio::sync::mpsc::{unbounded_channel, UnboundedReceiver, UnboundedSender};
+pub use tracing::{debug, error, info, warn, Level};
+
+//==============================================================================
+pub struct MultiRouter<ST, M, OM, SE, PD>
+where
+    ST: CertificateSignatureRecoverable,
+    M: Message<NodeIdPubKey = CertificateSignaturePubKey<ST>> + Decodable,
+    OM: Encodable + Into<M> + Clone,
+    PD: PeerDiscoveryAlgo<SignatureType = ST>,
+{
+    rc_primary: RaptorCast<ST, M, OM, SE, PD>,
+    rc_secondary: Option<RaptorCastSecondary<ST, M, OM, SE, PD>>,
+
+    // raptorcast config is stored for future role change
+    rc_config: RaptorCastConfig<ST>,
+    self_node_id: NodeId<CertificateSignaturePubKey<ST>>,
+    current_epoch: Epoch,
+    epoch_validators: BTreeMap<Epoch, BTreeSet<NodeId<CertificateSignaturePubKey<ST>>>>,
+    dp_writer: DataplaneWriter,
+    shared_pdd: Arc<Mutex<PeerDiscoveryDriver<PD>>>,
+
+    phantom: PhantomData<(OM, SE)>,
+}
+
+impl<ST, M, OM, SE, PD> MultiRouter<ST, M, OM, SE, PD>
+where
+    ST: CertificateSignatureRecoverable,
+    M: Message<NodeIdPubKey = CertificateSignaturePubKey<ST>> + Decodable,
+    OM: Encodable + Into<M> + Clone,
+    PD: PeerDiscoveryAlgo<SignatureType = ST>,
+{
+    pub fn new<B>(
+        self_node_id: NodeId<CertificateSignaturePubKey<ST>>,
+        cfg: RaptorCastConfig<ST>,
+        dataplane_builder: DataplaneBuilder,
+        peer_discovery_builder: B,
+        current_epoch: Epoch,
+        epoch_validators: BTreeMap<Epoch, BTreeSet<NodeId<CertificateSignaturePubKey<ST>>>>,
+    ) -> Self
+    where
+        B: PeerDiscoveryAlgoBuilder<PeerDiscoveryAlgoType = PD>,
+    {
+        // Peer discovery needs to be shared among primary and secondary
+        let pdd = PeerDiscoveryDriver::new(peer_discovery_builder);
+        let shared_pdd = Arc::new(Mutex::new(pdd));
+
+        let dp = dataplane_builder.build();
+        assert!(dp.block_until_ready(Duration::from_secs(1)));
+        let (dp_reader, dp_writer) = dp.split();
+
+        // Create a channel between primary and secondary raptorcast instances.
+        // Fundamentally this is needed because, while both can send, only the
+        // primary can receive data from the network.
+        let (send_net_messages, recv_net_messages) =
+            unbounded_channel::<FullNodesGroupMessage<ST>>();
+        let (send_group_infos, recv_group_infos) = unbounded_channel::<Group<ST>>();
+
+        let rc_secondary = Self::build_secondary(
+            cfg.clone(),
+            dp_writer.clone(),
+            shared_pdd.clone(),
+            recv_net_messages,
+            send_group_infos,
+        );
+
+        let mut rc_primary = RaptorCast::new(
+            cfg.clone(),
+            dp_reader,
+            dp_writer.clone(),
+            shared_pdd.clone(),
+        );
+        rc_primary.bind_channel_to_secondary_raptorcast(send_net_messages, recv_group_infos);
+
+        Self {
+            rc_primary,
+            rc_secondary,
+            rc_config: cfg,
+            current_epoch,
+            epoch_validators,
+            self_node_id,
+            dp_writer,
+            shared_pdd,
+            phantom: PhantomData,
+        }
+    }
+
+    fn update_role(&mut self, new_role: SecondaryRaptorCastModeConfig) {
+        debug!(?new_role, "Updating secondary raptorcast role");
+        self.rc_config.secondary_instance.mode = new_role;
+
+        // create new channels
+        let (send_net_messages, recv_net_messages) =
+            unbounded_channel::<FullNodesGroupMessage<ST>>();
+        let (send_group_infos, recv_group_infos) = unbounded_channel::<Group<ST>>();
+
+        let is_dynamic = matches!(
+            self.rc_config.secondary_instance.mode,
+            SecondaryRaptorCastModeConfig::Client
+        );
+        // we first need to update is_dynamic_full_node before binding the channels
+        self.rc_primary.set_is_dynamic_full_node(is_dynamic);
+        self.rc_primary
+            .bind_channel_to_secondary_raptorcast(send_net_messages, recv_group_infos);
+
+        let rc_secondary = Self::build_secondary(
+            self.rc_config.clone(),
+            self.dp_writer.clone(),
+            self.shared_pdd.clone(),
+            recv_net_messages,
+            send_group_infos,
+        );
+        self.rc_secondary = rc_secondary;
+    }
+
+    fn build_secondary(
+        cfg: RaptorCastConfig<ST>,
+        dp_writer: DataplaneWriter,
+        shared_pdd: Arc<Mutex<PeerDiscoveryDriver<PD>>>,
+        recv_net_messages: UnboundedReceiver<FullNodesGroupMessage<ST>>,
+        send_group_infos: UnboundedSender<Group<ST>>,
+    ) -> Option<RaptorCastSecondary<ST, M, OM, SE, PD>> {
+        let secondary_instance: RaptorCastConfigSecondary<ST> = match cfg.secondary_instance.mode {
+            SecondaryRaptorCastModeConfig::None => {
+                debug!("Configured with Secondary RaptorCast instance: None");
+                RaptorCastConfigSecondary::default()
+            }
+            SecondaryRaptorCastModeConfig::Client => {
+                debug!("Configured with Secondary RaptorCast instance: Client");
+                RaptorCastConfigSecondary {
+                    raptor10_redundancy: cfg.secondary_instance.raptor10_fullnode_redundancy_factor,
+                    mode: SecondaryRaptorCastMode::Client(RaptorCastConfigSecondaryClient {
+                        max_num_group: cfg.secondary_instance.max_num_group,
+                        max_group_size: cfg.secondary_instance.max_group_size,
+                        invite_future_dist_min: cfg.secondary_instance.invite_future_dist_min,
+                        invite_future_dist_max: cfg.secondary_instance.invite_future_dist_max,
+                        invite_accept_heartbeat: Duration::from_millis(
+                            cfg.secondary_instance.invite_accept_heartbeat_ms,
+                        ),
+                    }),
+                }
+            }
+            SecondaryRaptorCastModeConfig::Publisher => {
+                debug!("Configured with Secondary RaptorCast instance: Publisher");
+                let full_nodes_prioritized: Vec<NodeId<CertificateSignaturePubKey<ST>>> = cfg
+                    .secondary_instance
+                    .full_nodes_prioritized
+                    .identities
+                    .iter()
+                    .map(|id| NodeId::new(id.secp256k1_pubkey))
+                    .collect();
+
+                RaptorCastConfigSecondary {
+                    raptor10_redundancy: cfg.secondary_instance.raptor10_fullnode_redundancy_factor,
+                    mode: SecondaryRaptorCastMode::Publisher(RaptorCastConfigSecondaryPublisher {
+                        full_nodes_prioritized,
+                        group_scheduling: GroupSchedulingConfig {
+                            max_group_size: cfg.secondary_instance.max_group_size,
+                            round_span: cfg.secondary_instance.round_span,
+                            invite_lookahead: cfg.secondary_instance.invite_lookahead,
+                            max_invite_wait: cfg.secondary_instance.max_invite_wait,
+                            deadline_round_dist: cfg.secondary_instance.deadline_round_dist,
+                            init_empty_round_span: cfg.secondary_instance.init_empty_round_span,
+                        },
+                    }),
+                }
+            }
+        };
+
+        match secondary_instance.mode {
+            SecondaryRaptorCastMode::None => None,
+            _ => Some(RaptorCastSecondary::new(
+                cfg,
+                secondary_instance.mode,
+                dp_writer,
+                shared_pdd,
+                recv_net_messages,
+                send_group_infos,
+            )),
+        }
+    }
+}
+
+//==============================================================================
+impl<ST, M, OM, SE, PD> Executor for MultiRouter<ST, M, OM, SE, PD>
+where
+    ST: CertificateSignatureRecoverable,
+    M: Message<NodeIdPubKey = CertificateSignaturePubKey<ST>> + Decodable,
+    OM: Encodable + Into<M> + Clone,
+    PD: PeerDiscoveryAlgo<SignatureType = ST>,
+    RaptorCast<ST, M, OM, SE, PD>: Unpin,
+{
+    type Command = RouterCommand<ST, OM>;
+
+    fn exec(&mut self, a_commands: Vec<Self::Command>) {
+        let mut validator_cmds = Vec::new();
+        let mut fullnodes_cmds = Vec::new();
+        for cmd in a_commands {
+            match cmd {
+                RouterCommand::Publish { .. } => validator_cmds.push(cmd),
+                RouterCommand::AddEpochValidatorSet {
+                    epoch,
+                    validator_set,
+                } => {
+                    let cmd_cpy = RouterCommand::AddEpochValidatorSet {
+                        epoch,
+                        validator_set: validator_set.clone(),
+                    };
+                    debug!(?validator_set, "Updating validator set in multi router");
+                    let validator_set = validator_set.iter().map(|(id, _)| *id).collect();
+                    self.epoch_validators.insert(epoch, validator_set);
+
+                    // if self is a validator and will fall out in the next epoch validator set
+                    // switch role to Client in secondary raptorcast to start connecting to upstream
+                    if epoch == self.current_epoch + Epoch(1)
+                        && self
+                            .epoch_validators
+                            .get(&self.current_epoch)
+                            .is_some_and(|set| set.contains(&self.self_node_id))
+                        && !self
+                            .epoch_validators
+                            .get(&(self.current_epoch + Epoch(1)))
+                            .is_some_and(|set| set.contains(&self.self_node_id))
+                    {
+                        // validator demoted to full node, update role to be Client
+                        self.update_role(SecondaryRaptorCastModeConfig::Client);
+                    }
+
+                    validator_cmds.push(cmd_cpy);
+                }
+                RouterCommand::GetPeers => validator_cmds.push(cmd),
+                RouterCommand::UpdatePeers { .. } => validator_cmds.push(cmd),
+
+                RouterCommand::PublishToFullNodes { epoch, ref message } => {
+                    let cmd_cpy = RouterCommand::PublishToFullNodes {
+                        epoch,
+                        message: message.clone(),
+                    };
+                    validator_cmds.push(cmd_cpy);
+                    fullnodes_cmds.push(cmd);
+                }
+                RouterCommand::GetFullNodes => validator_cmds.push(cmd),
+                RouterCommand::UpdateFullNodes { .. } => validator_cmds.push(cmd),
+
+                RouterCommand::UpdateCurrentRound(epoch, round) => {
+                    let cmd_cpy = RouterCommand::UpdateCurrentRound(epoch, round);
+                    if epoch > self.current_epoch {
+                        // epoch increment
+                        debug!(?self.current_epoch, ?epoch, "Epoch incremented in multi router");
+                        let is_validator_before_epoch_increment = self
+                            .epoch_validators
+                            .get(&self.current_epoch)
+                            .is_some_and(|set| set.contains(&self.self_node_id));
+                        debug!(
+                            ?is_validator_before_epoch_increment,
+                            "Is validator before epoch increment"
+                        );
+                        self.current_epoch = epoch;
+                        let is_validator_after_epoch_increment = self
+                            .epoch_validators
+                            .get(&self.current_epoch)
+                            .is_some_and(|set| set.contains(&self.self_node_id));
+                        debug!(
+                            ?is_validator_after_epoch_increment,
+                            "Is validator after epoch increment"
+                        );
+
+                        // check if secondary raptorcast role needs to be updated
+                        if !is_validator_before_epoch_increment
+                            && is_validator_after_epoch_increment
+                        {
+                            // full node promoted to validator, update role to be Publisher
+                            self.update_role(SecondaryRaptorCastModeConfig::Publisher);
+                        }
+
+                        // clean old epoch validators
+                        self.epoch_validators
+                            .retain(|epoch, _| *epoch + Epoch(1) >= self.current_epoch);
+                    }
+                    validator_cmds.push(cmd);
+                    fullnodes_cmds.push(cmd_cpy);
+                }
+            }
+        }
+        self.rc_primary.exec(validator_cmds);
+        if self.rc_secondary.is_some() {
+            self.rc_secondary.as_mut().unwrap().exec(fullnodes_cmds);
+        }
+    }
+
+    fn metrics(&self) -> ExecutorMetricsChain {
+        let m1 = self.rc_primary.metrics();
+        let res: ExecutorMetricsChain = if self.rc_secondary.is_some() {
+            let m2 = self.rc_secondary.as_ref().unwrap().metrics();
+            m1.chain(m2)
+        } else {
+            m1
+        };
+        res
+    }
+}
+
+//==============================================================================
+impl<ST, M, OM, E, PD> Stream for MultiRouter<ST, M, OM, E, PD>
+where
+    ST: CertificateSignatureRecoverable,
+    M: Message<NodeIdPubKey = CertificateSignaturePubKey<ST>> + Decodable,
+    OM: Encodable + Into<M> + Clone,
+    E: From<RaptorCastEvent<M::Event, ST>>,
+    Self: Unpin,
+    RaptorCast<ST, M, OM, E, PD>: Unpin,
+    RaptorCastSecondary<ST, M, OM, E, PD>: Unpin,
+    PD: PeerDiscoveryAlgo<SignatureType = ST>,
+    PeerDiscoveryDriver<PD>: Unpin,
+{
+    type Item = E;
+
+    fn poll_next(
+        mut self: Pin<&mut Self>,
+        cx: &mut std::task::Context<'_>,
+    ) -> std::task::Poll<Option<Self::Item>> {
+        let pinned_this = self.as_mut().get_mut();
+
+        // Primary RC instance polls for inbound TCP, UDP raptorcast
+        // and FullNodesGroupMessage intended for the secondary RC instance.
+        match pinned_this.rc_primary.poll_next_unpin(cx) {
+            Poll::Ready(Some(event)) => return Poll::Ready(Some(event)),
+            Poll::Ready(None) => {
+                error!("Primary RaptorCast stream ended unexpectedly.");
+            }
+            Poll::Pending => {}
+        }
+
+        // Secondary RC instance polls for FullNodesGroupMessage coming in from
+        // the Channel Primary->Secondary.
+        if self.rc_secondary.is_some() {
+            let fn_stream = self.rc_secondary.as_mut().unwrap();
+            match fn_stream.poll_next_unpin(cx) {
+                Poll::Ready(Some(event)) => return Poll::Ready(Some(event)),
+                Poll::Ready(None) => {
+                    error!("Secondary RaptorCast stream ended unexpectedly.");
+                }
+                Poll::Pending => {}
+            }
+        }
+
+        Poll::Pending
+    }
+}
