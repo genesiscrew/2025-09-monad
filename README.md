@@ -740,8 +740,6 @@ Contains the Monad consensus client and JsonRpc server. Monad consensus collects
 | ./monad/category/vm/compiler/ir/basic_blocks.cpp                             |     65 |
 | ./monad/category/vm/compiler/ir/basic_blocks.hpp                             |    420 |
 | ./monad/category/vm/compiler/ir/instruction.hpp                              |    405 |
-| ./monad/category/vm/compiler/ir/poly_typed.cpp                               |    486 |
-| ./monad/category/vm/compiler/ir/poly_typed.hpp                               |     26 |
 | ./monad/category/vm/compiler/ir/x86.cpp                                      |    439 |
 | ./monad/category/vm/compiler/ir/x86.hpp                                      |     28 |
 | ./monad/category/vm/compiler/ir/x86/emitter.cpp                              |   6291 |
