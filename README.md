@@ -100,6 +100,12 @@ Contains the Monad consensus client and JsonRpc server. Monad consensus collects
 - **Website:** https://www.monad.xyz
 - **X/Twitter:** https://x.com/monad
 
+### Code walk-throughs
+
+1. [Consensus](https://youtu.be/SnGXl0ejCy4)
+2. [Execution](https://youtu.be/funlv0idZL0)
+3. [Networking](https://youtu.be/moW3GELFeR8) 
+
 ---
 
 # Scope
