@@ -833,7 +833,7 @@ Contains the Monad consensus client and JsonRpc server. Monad consensus collects
 | ./monad/category/vm/varcode_cache.hpp                                        |     46 |
 | ./monad/category/vm/vm.cpp                                                   |    174 |
 | ./monad/category/vm/vm.hpp                                                   |    183 |
-| Sum                                                                          | 164758 |
+| Sum                                                                          | 164246 |
 
 
 ### Files out of scope
