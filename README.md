@@ -32,7 +32,7 @@ _Note for C4 wardens: Anything included in this `Automated Findings / Publicly K
 
 The following issues and risks are considered **known** or **by design** and will not be considered valid findings in this contest.
 
-- Duplicated validation logic for EIP-7702 authorization lists. (C4 staff note: this issue was addressed by a public [PR](https://github.com/category-labs/monad-bft/pull/2365), a duplicate of one that was originally created on September 16, 2025 at 15:38 UTC; therefore all submissions of this finding after that timestamp will be considered out of scope.)
+- Duplicated validation logic for EIP-7702 authorization lists. (C4 staff note: this issue was addressed by a public [PR](https://github.com/category-labs/monad-bft/pull/2365), created on September 17, 2025 at 15:15 UTC; therefore all submissions of this finding after that timestamp will be considered out of scope.)
 
 ### General Risks
 
