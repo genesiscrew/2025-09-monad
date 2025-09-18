@@ -32,6 +32,8 @@ _Note for C4 wardens: Anything included in this `Automated Findings / Publicly K
 
 The following issues and risks are considered **known** or **by design** and will not be considered valid findings in this contest.
 
+- Duplicated validation logic for EIP-7702 authorization lists. (C4 staff note: this issue was addressed by a public [PR](https://github.com/category-labs/monad-bft/pull/2365), a duplicate of one that was originally created on September 16, 2025 at 15:38 UTC; therefore all submissions of this finding after that timestamp will be considered out of scope.)
+
 ### General Risks
 
 - **Attacks on the Consensus Trust Model:** The security of the Monad protocol relies on a fundamental assumption of a supermajority of stake weight being non-faulty. Therefore, any attack scenario requiring more than 1/3 of the network's stake to be malicious is considered a fundamental, out-of-scope attack on the protocol's trust model and will not be considered a valid finding. This includes, but is not limited to, scenarios resulting in network finality failures, double-spending, or long-range attacks.
