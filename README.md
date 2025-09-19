@@ -32,7 +32,8 @@ _Note for C4 wardens: Anything included in this `Automated Findings / Publicly K
 
 The following issues and risks are considered **known** or **by design** and will not be considered valid findings in this contest.
 
-- Duplicated validation logic for EIP-7702 authorization lists. (C4 staff note: this issue was addressed by a public [PR](https://github.com/category-labs/monad-bft/pull/2365), created on September 17, 2025 at 15:15 UTC; therefore all submissions of this finding after that timestamp will be considered out of scope.)
+- Reserve balance checks were not applied consistently to create transactions, e.g. CREATE / CREATE2 (C4 staff note: there was a public PR originally created to address this issue on September 16, 2025 at 15:38 UTC; therefore all submissions related to this finding after that timestamp will be considered out of scope.)
+- Duplicated validation logic for EIP-7702 authorization lists. (C4 staff note: this issue was addressed by a public [PR](https://github.com/category-labs/monad-bft/pull/2365))
 
 ### General Risks
 
