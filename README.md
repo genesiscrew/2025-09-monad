@@ -843,6 +843,8 @@ Contains the Monad consensus client and JsonRpc server. Monad consensus collects
 
 Any code not reachable via a running node under default configuration (e.g., test, mock or fuzzing code) is out of scope. Any project, development, build configuration or build, scripting or other miscellaneous development or testing files are out of scope. 
 
+_Note re: default configuration: `MONAD_FOUR` is the relevant feature set for execution, despite the fact that the mainnet config in this commit references `MONAD_THREE`._
+
 Findings concerning known vulnerabilities within third-party dependencies (‘**/third_party/*’) themselves are out of scope. However, a bug is considered a valid finding if it leads to a protocol-level vulnerability.
 
 Any proof of concepts must demonstrate how the report is triggerable by an attacker, outlining the full attack path on a default node configuration, which exploits in-scope code.
