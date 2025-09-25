@@ -1,0 +1,28 @@
+name: Execution CI
+
+on:
+  push:
+    branches: [work]
+  pull_request:
+    branches: [work]
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    name: Build and test C++ execution layer
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Build execution artifacts and run tests
+        run: |
+          docker build \
+            --progress=plain \
+            --build-arg GIT_COMMIT_HASH=${{ github.sha }} \
+            --target build \
+            -f monad/docker/release.Dockerfile \
+            monad
