@@ -1,0 +1,46 @@
+name: BFT CI
+
+on:
+  push:
+    branches: [work]
+  pull_request:
+    branches: [work]
+  workflow_dispatch:
+
+jobs:
+  rust:
+    name: Lint and test Rust workspace
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Build test environment image
+        run: |
+          docker build \
+            --build-arg TRIEDB_TARGET=triedb_driver \
+            -t monad-bft-builder \
+            -f bft/docker/builder/Dockerfile \
+            bft/docker/builder
+
+      - name: Run cargo checks
+        env:
+          CARGO_TERM_COLOR: always
+        run: |
+          docker run --rm \
+            -v "${{ github.workspace }}:/workspace" \
+            -w /workspace/bft \
+            monad-bft-builder \
+            bash -lc '
+              set -euo pipefail
+              git config --global --add safe.directory /workspace
+              git config --global --add safe.directory /workspace/bft
+              rustup default 1.87.0-x86_64-unknown-linux-gnu
+              rustup component add --toolchain 1.87.0-x86_64-unknown-linux-gnu rustfmt clippy
+              cargo fmt --all -- --check
+              cargo clippy --workspace --all-targets -- -D warnings
+              cargo test --workspace
+            '
