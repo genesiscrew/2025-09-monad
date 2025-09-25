@@ -36,39 +36,23 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Enable GCC toolchain repository
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y software-properties-common
-          sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-          sudo apt-get update
-
       - name: Install system dependencies
         run: |
+          sudo apt-get update
           sudo apt-get install -y \
-            gcc-15 \
-            g++-15 \
-            cmake \
-            ninja-build \
-            pkg-config \
-            libboost-all-dev \
-            libgtest-dev \
-            libgmock-dev \
-            libtbb-dev \
-            libarchive-dev \
-            libgmp-dev \
-            libcrypto++-dev \
-            libzstd-dev \
-            libbrotli-dev
+            clang-19 lld-19 cmake ninja-build pkg-config \
+            libboost-all-dev libgtest-dev libgmock-dev libtbb-dev \
+            libarchive-dev libgmp-dev libcrypto++-dev libzstd-dev libbrotli-dev
 
       - name: Configure and build Monad VM unit tests
         working-directory: monad
         env:
-          CC: gcc-15
-          CXX: g++-15
+          CC: clang-19
+          CXX: clang++-19
           CFLAGS: -march=haswell
           CXXFLAGS: -march=haswell
           ASMFLAGS: -march=haswell
+          LDFLAGS: -fuse-ld=lld
         run: |
           ./scripts/configure.sh
           cmake --build build --target vm-unit-tests -- -j1
